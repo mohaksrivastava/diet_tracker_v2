@@ -2,7 +2,7 @@
 title: Call Bhaiya
 emoji: 🔥
 colorFrom: green
-colorTo: teal
+colorTo: green
 sdk: streamlit
 sdk_version: 1.45.0
 app_file: app.py

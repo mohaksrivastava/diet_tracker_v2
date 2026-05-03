@@ -1,0 +1,22 @@
+2026-05-01 14:29:38 [GEN] INFO ============================================================
+2026-05-01 14:29:38 [GEN] INFO Recipe Generation Agent starting
+2026-05-01 14:29:38 [GEN] INFO Loaded 2 recipe specs
+2026-05-01 14:29:38 [GEN] INFO Pending: 2
+2026-05-01 14:29:38 [GEN] INFO Batch 1/1: ['Test Masala Omelette', 'Test Veg Hakka Noodles']
+2026-05-01 14:31:34 [GEN] INFO HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-05-01 14:31:34 [GEN] INFO   ✓ Test Masala Omelette
+2026-05-01 14:31:34 [GEN] INFO   ✓ Test Veg Hakka Noodles
+2026-05-01 14:31:35 [GEN] INFO Done — total generated: 2
+2026-05-01 14:31:35 [GEN] INFO ============================================================
+2026-05-01 14:32:32 [GEN] INFO ============================================================
+2026-05-01 14:32:32 [GEN] INFO Recipe Generation Agent starting
+2026-05-01 14:32:32 [GEN] INFO Loaded 150 recipe specs
+2026-05-01 14:32:32 [GEN] INFO Pending: 150
+2026-05-01 14:32:32 [GEN] INFO Batch 1/30: ['Poha with Sprouts', 'Rava Upma', 'Besan Chilla', 'Masala Omelette', 'Aloo Paratha']
+2026-05-01 14:37:33 [GEN] INFO HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-05-01 14:37:33 [GEN] INFO   ✓ Poha with Sprouts
+2026-05-01 14:37:33 [GEN] INFO   ✓ Rava Upma
+2026-05-01 14:37:33 [GEN] INFO   ✓ Besan Chilla
+2026-05-01 14:37:33 [GEN] INFO   ✓ Masala Omelette
+2026-05-01 14:37:33 [GEN] INFO   ✓ Aloo Paratha
+2026-05-01 14:37:34 [GEN] INFO Batch 2/30: ['Paneer Paratha', 'Methi Thepla', 'Idli with Sambar', 'Masala Dosa', 'Uttapam']

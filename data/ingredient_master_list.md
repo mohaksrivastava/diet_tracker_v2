@@ -1,0 +1,341 @@
+# Master Ingredient List
+
+> Standardised names for the 150-recipe expansion.  
+> Rules: (1) Use these exact strings in every recipe. (2) Quantity must be in **g** or **ml** only.  
+> Format in CSV: `Ingredient name quantity|Ingredient name quantity`
+
+## Grains & Flours
+- Rice basmati
+- Rice brown
+- Rice white
+- Rice red matta
+- Poha (flattened rice)
+- Semolina (rava / sooji)
+- Wheat flour (atta)
+- Maida (refined flour)
+- Chickpea flour (besan)
+- Rice flour
+- Ragi flour
+- Oats rolled
+- Quinoa
+- Couscous
+- Panko breadcrumbs
+- Bread whole wheat
+- Bread white
+- Pasta penne
+- Pasta spaghetti
+- Rice noodles
+- Udon noodles
+- Vermicelli
+
+## Lentils & Legumes
+- Yellow moong dal
+- Masoor dal (red lentil)
+- Toor dal (pigeon pea)
+- Urad dal (black gram)
+- Chana dal (split Bengal gram)
+- Rajma (kidney beans)
+- Chole (chickpeas)
+- Black-eyed peas (lobia)
+- Green moong whole
+- Soybeans
+- Edamame
+
+## Vegetables
+- Onion
+- Tomato
+- Potato
+- Garlic
+- Ginger
+- Green chilli
+- Red chilli
+- Capsicum green
+- Capsicum red
+- Capsicum yellow
+- Carrot
+- Cauliflower
+- Cabbage
+- Spinach
+- Fenugreek leaves (methi)
+- Mustard greens (sarson)
+- Bottle gourd (lauki)
+- Bitter gourd (karela)
+- Okra (bhindi)
+- Eggplant (brinjal)
+- Green beans
+- French beans
+- Snow peas
+- Broccoli
+- Zucchini
+- Mushroom button
+- Mushroom shiitake
+- Sweet potato
+- Pumpkin
+- Beetroot
+- Cucumber
+- Radish white
+- Radish red
+- Corn kernels
+- Baby corn
+- Green peas
+- Avocado
+- Lemon
+- Lime
+- Coriander leaves
+- Mint leaves
+- Curry leaves
+- Spring onion
+- Celery
+- Leek
+- Asparagus
+- Bell pepper
+- Cherry tomato
+- Kale
+- Rocket leaves (arugula)
+- Lettuce iceberg
+- Lettuce romaine
+
+## Dairy & Eggs
+- Milk whole
+- Milk toned
+- Milk skimmed
+- Curd (yoghurt)
+- Greek yoghurt
+- Paneer
+- Cheese cheddar
+- Cheese mozzarella
+- Cheese feta
+- Cheese cream
+- Butter
+- Butter unsalted
+- Ghee
+- Cream
+- Cream heavy
+- Buttermilk
+- Eggs whole
+- Egg whites only
+- Egg yolks only
+
+## Meat & Poultry
+- Chicken breast
+- Chicken thigh
+- Chicken drumstick
+- Chicken mince (keema)
+- Mutton (goat meat)
+- Lamb chops
+- Pork belly
+- Bacon
+- Ham
+- Turkey breast
+- Duck breast
+- Salami
+
+## Seafood
+- Prawns
+- Fish rohu
+- Fish pomfret
+- Fish salmon
+- Fish tuna
+- Fish basa
+- Fish mackerel
+- Squid
+- Crab meat
+
+## Nuts, Seeds & Dry Fruits
+- Almonds
+- Cashews
+- Walnuts
+- Pistachios
+- Peanuts
+- Chia seeds
+- Flaxseeds
+- Sesame seeds white
+- Sesame seeds black
+- Sunflower seeds
+- Pumpkin seeds
+- Raisins
+- Dates
+- Figs dried
+
+## Oils, Fats & Vinegars
+- Oil vegetable
+- Oil mustard
+- Oil sesame
+- Oil olive
+- Oil coconut
+- Oil peanut
+- Ghee (clarified butter)
+- Butter
+- Coconut oil
+- Vinegar white
+- Vinegar apple cider
+- Balsamic vinegar
+- Rice vinegar
+- Wine vinegar
+
+## Spices & Seasonings
+- Turmeric powder
+- Red chilli powder
+- Coriander powder
+- Cumin seeds
+- Cumin powder
+- Mustard seeds
+- Fenugreek seeds
+- Fennel seeds
+- Carom seeds (ajwain)
+- Asafoetida (hing)
+- Garam masala
+- Chaat masala
+- Panch phoron
+- Black pepper whole
+- Black pepper powder
+- White pepper powder
+- Cardamom green
+- Cardamom black
+- Cinnamon stick
+- Cinnamon powder
+- Cloves
+- Bay leaf
+- Nutmeg
+- Mace
+- Saffron
+- Kashmiri red chilli powder
+- Sambar powder
+- Rasam powder
+- Curry powder
+- Five-spice powder
+- Star anise
+- Sichuan peppercorns
+- Dried red chilli
+- Paprika
+- Smoked paprika
+- Cayenne pepper
+- Oregano dried
+- Oregano fresh
+- Basil dried
+- Basil fresh
+- Thyme dried
+- Thyme fresh
+- Rosemary dried
+- Rosemary fresh
+- Sage
+- Parsley fresh
+- Dill fresh
+- Mint fresh
+- Coriander fresh
+- Tarragon
+- Marjoram
+- Capers
+- Pickled jalapeños
+
+## Sauces, Pastes & Condiments
+- Tomato ketchup
+- Tomato puree
+- Tomato paste
+- Soy sauce
+- Soy sauce dark
+- Oyster sauce
+- Hoisin sauce
+- Fish sauce
+- Sriracha
+- Schezwan sauce
+- Green chilli sauce
+- Red chilli sauce
+- Vinegar
+- Tamarind paste
+- Tamarind pulp
+- Coconut milk
+- Coconut cream
+- Coconut grated
+- Coconut desiccated
+- Peanut butter
+- Tahini
+- Harissa paste
+- Pesto
+- Mustard paste
+- Worcestershire sauce
+- BBQ sauce
+- Teriyaki sauce
+- Mirin
+- Miso paste
+- Gochujang
+- Kimchi
+- Pickle mango
+- Pickle lemon
+- Pickle chilli
+- Chutney mint
+- Chutney tamarind
+- Chutney coconut
+- Raita
+- Hummus
+- Baba ganoush
+- Tzatziki
+
+## Sweeteners & Baking
+- Sugar white
+- Sugar brown
+- Sugar jaggery
+- Sugar palm (gur)
+- Honey
+- Maple syrup
+- Agave syrup
+- Stevia
+- Baking powder
+- Baking soda
+- Yeast dry
+- Vanilla extract
+- Cocoa powder
+- Dark chocolate
+- Milk chocolate
+- White chocolate
+- Chocolate chips
+- Custard powder
+- Gelatin
+- Cornflour (cornstarch)
+- Arrowroot powder
+- Bread crumbs
+
+## Misc
+- Water
+- Ice
+- Stock vegetable
+- Stock chicken
+- Stock beef
+- Stock fish
+- Wine white
+- Wine red
+- Beer
+- Sake
+- Rose water
+- Orange blossom water
+- Kewra water
+- Saffron water
+- Edible gold leaf
+- Seaweed nori
+- Seaweed wakame
+- Rice paper
+- Tofu firm
+- Tofu silken
+- Tempeh
+- Seitan
+- Nutritional yeast
+- Soya chunks
+- Textured vegetable protein
+- Ready-made roti
+- Ready-made paratha
+- Ready-made naan
+- Tortilla flour
+- Tortilla corn
+- Pita bread
+- Baguette
+- Focaccia
+- Ciabatta
+- Sourdough bread
+- Miso soup base
+- Dashi powder
+- Tomato soup base
+- Vermicelli roasted
+- Sago (sabudana)
+- Tapioca pearls
+- Vermicelli rice
+- Vermicelli wheat

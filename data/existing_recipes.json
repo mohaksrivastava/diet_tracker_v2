@@ -1,0 +1,350 @@
+[
+  {
+    "name": "Almonds",
+    "source": "recipes"
+  },
+  {
+    "name": "Aloo Bhuiya",
+    "source": "recipes"
+  },
+  {
+    "name": "Aloo Gobi",
+    "source": "recipes"
+  },
+  {
+    "name": "Aloo Paratha",
+    "source": "recipes"
+  },
+  {
+    "name": "Apple",
+    "source": "recipes"
+  },
+  {
+    "name": "Avocado Toast",
+    "source": "recipes"
+  },
+  {
+    "name": "Banana",
+    "source": "recipes"
+  },
+  {
+    "name": "Banana Oat Pancakes",
+    "source": "recipes"
+  },
+  {
+    "name": "Basil Seeds",
+    "source": "recipes"
+  },
+  {
+    "name": "Beetroot (Raw)",
+    "source": "recipes"
+  },
+  {
+    "name": "Besan Chilla",
+    "source": "recipes"
+  },
+  {
+    "name": "Bhindi Bhujiya",
+    "source": "recipes"
+  },
+  {
+    "name": "Boiled Eggs with Seasoning",
+    "source": "recipes"
+  },
+  {
+    "name": "Butter (10g)",
+    "source": "recipes"
+  },
+  {
+    "name": "Buttermilk (Chaach)",
+    "source": "recipes"
+  },
+  {
+    "name": "Carrot (Raw)",
+    "source": "recipes"
+  },
+  {
+    "name": "Cashews",
+    "source": "recipes"
+  },
+  {
+    "name": "Chia Seeds",
+    "source": "recipes"
+  },
+  {
+    "name": "Chicken Curry",
+    "source": "recipes"
+  },
+  {
+    "name": "Chole",
+    "source": "recipes"
+  },
+  {
+    "name": "Cucumber (Raw)",
+    "source": "recipes"
+  },
+  {
+    "name": "Dal Makhani",
+    "source": "recipes"
+  },
+  {
+    "name": "Dal Tadka",
+    "source": "recipes"
+  },
+  {
+    "name": "Daliya",
+    "source": "recipes"
+  },
+  {
+    "name": "Egg Curry",
+    "source": "recipes"
+  },
+  {
+    "name": "Egg Fried Rice",
+    "source": "recipes"
+  },
+  {
+    "name": "Flaxseed",
+    "source": "recipes"
+  },
+  {
+    "name": "Ghee (1 tbsp)",
+    "source": "recipes"
+  },
+  {
+    "name": "Greek Yogurt Bowl",
+    "source": "recipes"
+  },
+  {
+    "name": "Grilled Chicken Salad",
+    "source": "recipes"
+  },
+  {
+    "name": "Grilled Chicken with Vegetables",
+    "source": "recipes"
+  },
+  {
+    "name": "Grilled Paneer",
+    "source": "recipes"
+  },
+  {
+    "name": "Grilled Rohu Fish",
+    "source": "recipes"
+  },
+  {
+    "name": "Idli",
+    "source": "recipes"
+  },
+  {
+    "name": "Laiyya Channa",
+    "source": "recipes"
+  },
+  {
+    "name": "Masala Dosa",
+    "source": "recipes"
+  },
+  {
+    "name": "Masala Omelette",
+    "source": "recipes"
+  },
+  {
+    "name": "Masala Paratha",
+    "source": "recipes"
+  },
+  {
+    "name": "Masoor Dal",
+    "source": "recipes"
+  },
+  {
+    "name": "Masoor Dal Kababs",
+    "source": "recipes"
+  },
+  {
+    "name": "Milk Coffee",
+    "source": "recipes"
+  },
+  {
+    "name": "Milk Tea",
+    "source": "recipes"
+  },
+  {
+    "name": "Moong Dal Chilla",
+    "source": "recipes"
+  },
+  {
+    "name": "Multigrain Dosa",
+    "source": "recipes"
+  },
+  {
+    "name": "Multigrain Idli",
+    "source": "recipes"
+  },
+  {
+    "name": "Multigrain Paratha / Roti",
+    "source": "recipes"
+  },
+  {
+    "name": "Muskmelon",
+    "source": "recipes"
+  },
+  {
+    "name": "Oats Porridge",
+    "source": "recipes"
+  },
+  {
+    "name": "Olive Oil (1 tbsp)",
+    "source": "recipes"
+  },
+  {
+    "name": "Onion (Raw)",
+    "source": "recipes"
+  },
+  {
+    "name": "Orange",
+    "source": "recipes"
+  },
+  {
+    "name": "Palak Paneer",
+    "source": "recipes"
+  },
+  {
+    "name": "Paneer Bhurji",
+    "source": "recipes"
+  },
+  {
+    "name": "Paneer Tikka",
+    "source": "recipes"
+  },
+  {
+    "name": "Pasta Primavera",
+    "source": "recipes"
+  },
+  {
+    "name": "Peanut Butter Banana Toast",
+    "source": "recipes"
+  },
+  {
+    "name": "Peanuts",
+    "source": "recipes"
+  },
+  {
+    "name": "Plain Dosa",
+    "source": "recipes"
+  },
+  {
+    "name": "Plain Paratha",
+    "source": "recipes"
+  },
+  {
+    "name": "Poha",
+    "source": "recipes"
+  },
+  {
+    "name": "Pomegranate",
+    "source": "recipes"
+  },
+  {
+    "name": "Raisins",
+    "source": "recipes"
+  },
+  {
+    "name": "Rajma",
+    "source": "recipes"
+  },
+  {
+    "name": "Rasam",
+    "source": "recipes"
+  },
+  {
+    "name": "Red Sauce Pasta (Chicken)",
+    "source": "recipes"
+  },
+  {
+    "name": "Red Sauce Pasta (Veg)",
+    "source": "recipes"
+  },
+  {
+    "name": "Roasted Makhana",
+    "source": "recipes"
+  },
+  {
+    "name": "Rohu Fish Curry",
+    "source": "recipes"
+  },
+  {
+    "name": "Sambhar",
+    "source": "recipes"
+  },
+  {
+    "name": "Spiced Roasted Chana",
+    "source": "recipes"
+  },
+  {
+    "name": "Sprouts Chaat",
+    "source": "recipes"
+  },
+  {
+    "name": "Steamed Chicken",
+    "source": "recipes"
+  },
+  {
+    "name": "Steamed Rice",
+    "source": "recipes"
+  },
+  {
+    "name": "Tehri",
+    "source": "recipes"
+  },
+  {
+    "name": "Toasted Brown Bread with Butter",
+    "source": "recipes"
+  },
+  {
+    "name": "Tomato (Raw)",
+    "source": "recipes"
+  },
+  {
+    "name": "Tomato Rice",
+    "source": "recipes"
+  },
+  {
+    "name": "Tomato Soup (Indian Style)",
+    "source": "recipes"
+  },
+  {
+    "name": "Upma",
+    "source": "recipes"
+  },
+  {
+    "name": "Vegetable Clear Soup",
+    "source": "recipes"
+  },
+  {
+    "name": "Vegetable Pulao",
+    "source": "recipes"
+  },
+  {
+    "name": "Vegetable Salad Sandwich",
+    "source": "recipes"
+  },
+  {
+    "name": "Walnuts",
+    "source": "recipes"
+  },
+  {
+    "name": "Watermelon",
+    "source": "recipes"
+  },
+  {
+    "name": "Watermelon Seeds",
+    "source": "recipes"
+  },
+  {
+    "name": "Whole Wheat Roti (Chapati)",
+    "source": "recipes"
+  },
+  {
+    "name": "Sabudana Khichdi",
+    "source": "custom_recipes"
+  }
+]

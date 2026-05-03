@@ -1,0 +1,1352 @@
+[
+  {
+    "name": "Poha with Sprouts",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "grain_breakfast",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Rava Upma",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "grain_breakfast",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Besan Chilla",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "grain_breakfast",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Masala Omelette",
+    "meal_type": "Breakfast",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "egg",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Aloo Paratha",
+    "meal_type": "Breakfast",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "roti",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Paneer Paratha",
+    "meal_type": "Breakfast",
+    "food_type": "dairy",
+    "role": "complete_meal",
+    "food_group": "roti",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Methi Thepla",
+    "meal_type": "Breakfast",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "roti",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Idli with Sambar",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "south_indian",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Masala Dosa",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "south_indian",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Uttapam",
+    "meal_type": "Breakfast",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "south_indian",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Sabudana Khichdi",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "grain_breakfast",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Egg Bhurji",
+    "meal_type": "Breakfast",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "egg",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Moong Dal Cheela",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "grain_breakfast",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Chole Bhature",
+    "meal_type": "Breakfast; Lunch",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "chaat",
+    "difficulty": "Hard",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Bread Pakora",
+    "meal_type": "Breakfast; Snack",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "toast",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Rajma Masala",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_protein",
+    "food_group": "dal",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Chana Masala",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_protein",
+    "food_group": "dal",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Dal Makhani",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "anchor_protein",
+    "food_group": "dal",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Yellow Dal Tadka",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_protein",
+    "food_group": "dal",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Sambar",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_protein",
+    "food_group": "dal",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Paneer Butter Masala",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "anchor_protein",
+    "food_group": "paneer",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Kadai Paneer",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "anchor_protein",
+    "food_group": "paneer",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Palak Paneer",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "anchor_protein",
+    "food_group": "paneer",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Chicken Curry",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Butter Chicken",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Chicken Tikka Masala",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Rogan Josh",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "kabab",
+    "difficulty": "Hard",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Mutton Curry",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "kabab",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Fish Curry",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "fish",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Egg Curry",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "egg",
+    "role": "anchor_protein",
+    "food_group": "egg",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Tandoori Chicken",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Bhindi Masala",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Aloo Gobi",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Baingan Bharta",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Dum Aloo",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Mix Veg Sabzi",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Aloo Methi",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Lauki Chana Dal",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Bharwa Baingan",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Hard",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Jeera Rice",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_starch",
+    "food_group": "rice",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Vegetable Pulao",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_starch",
+    "food_group": "rice",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Lemon Rice",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_starch",
+    "food_group": "rice",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Biryani (Veg)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "rice",
+    "difficulty": "Hard",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Chicken Biryani",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "rice",
+    "difficulty": "Hard",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Tawa Roti",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_starch",
+    "food_group": "roti",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Butter Naan",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "anchor_starch",
+    "food_group": "roti",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Missi Roti",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_starch",
+    "food_group": "roti",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Raita (Cucumber)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "side",
+    "food_group": "dairy",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Papad",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Kachumber Salad",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Mint Chutney",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Onion Salad",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Pickle (Mango)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Boondi Raita",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "side",
+    "food_group": "dairy",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Samosa",
+    "meal_type": "Snack",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "chaat",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Aloo Tikki",
+    "meal_type": "Snack",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "chaat",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Pani Puri",
+    "meal_type": "Snack",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "chaat",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Bhel Puri",
+    "meal_type": "Snack",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "chaat",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Dahi Vada",
+    "meal_type": "Snack",
+    "food_type": "dairy",
+    "role": "complete_meal",
+    "food_group": "chaat",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Pav Bhaji",
+    "meal_type": "Snack; Dinner",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "chaat",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Paneer Tikka",
+    "meal_type": "Snack",
+    "food_type": "dairy",
+    "role": "anchor_protein",
+    "food_group": "paneer",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Chicken Tikka",
+    "meal_type": "Snack",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Masala Chai",
+    "meal_type": "Snack; Breakfast",
+    "food_type": "dairy",
+    "role": "beverage",
+    "food_group": "drink",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Sweet Lassi",
+    "meal_type": "Snack",
+    "food_type": "dairy",
+    "role": "beverage",
+    "food_group": "drink",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Nimbu Pani",
+    "meal_type": "Snack",
+    "food_type": "vegan",
+    "role": "beverage",
+    "food_group": "drink",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Aam Panna",
+    "meal_type": "Snack",
+    "food_type": "vegan",
+    "role": "beverage",
+    "food_group": "drink",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Tomato Soup (Indian)",
+    "meal_type": "Snack; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Mulligatawny Soup",
+    "meal_type": "Snack; Dinner",
+    "food_type": "non-veg",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Rasam",
+    "meal_type": "Snack; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Sweet Corn Soup",
+    "meal_type": "Snack; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Vegetable Hakka Noodles",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "pasta",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Schezwan Noodles",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "pasta",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Chicken Hakka Noodles",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "pasta",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Veg Manchurian Gravy",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Gobi Manchurian Dry",
+    "meal_type": "Snack",
+    "food_type": "veg",
+    "role": "side",
+    "food_group": "veg_curry",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Chilli Paneer",
+    "meal_type": "Snack; Dinner",
+    "food_type": "dairy",
+    "role": "anchor_protein",
+    "food_group": "paneer",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Chilli Chicken",
+    "meal_type": "Snack; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Chicken Manchurian",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Veg Fried Rice",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_starch",
+    "food_group": "rice",
+    "difficulty": "Easy",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Egg Fried Rice",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "egg",
+    "role": "anchor_starch",
+    "food_group": "rice",
+    "difficulty": "Easy",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Chicken Fried Rice",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "rice",
+    "difficulty": "Easy",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Schezwan Fried Rice",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_starch",
+    "food_group": "rice",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Veg Spring Rolls",
+    "meal_type": "Snack",
+    "food_type": "veg",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Chicken Spring Rolls",
+    "meal_type": "Snack",
+    "food_type": "non-veg",
+    "role": "side",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Hot and Sour Soup",
+    "meal_type": "Snack; Dinner",
+    "food_type": "veg",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Easy",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Creamy Tomato Basil Soup",
+    "meal_type": "Snack; Dinner",
+    "food_type": "veg",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Minestrone Soup",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "soup",
+    "difficulty": "Medium",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Vegetable Stew",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "veg_curry",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Chicken Stew",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Grilled Vegetable Salad",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_veg",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Caesar Salad (Veg)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_veg",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Caesar Salad (Chicken)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "chicken",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Pasta Arrabbiata",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "pasta",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Pasta Alfredo (Veg)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "pasta",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Pasta Alfredo (Chicken)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "pasta",
+    "difficulty": "Medium",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Penne Pesto",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "pasta",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Spaghetti Aglio e Olio",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "pasta",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Veg Grilled Sandwich",
+    "meal_type": "Snack; Breakfast",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "toast",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Chicken Grilled Sandwich",
+    "meal_type": "Snack; Breakfast",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "toast",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Egg Salad Sandwich",
+    "meal_type": "Snack; Breakfast",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "toast",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "French Toast",
+    "meal_type": "Breakfast",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "toast",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Scrambled Eggs on Toast",
+    "meal_type": "Breakfast",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "toast",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Herb Omelette",
+    "meal_type": "Breakfast",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "egg",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Shakshuka",
+    "meal_type": "Breakfast; Dinner",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "egg",
+    "difficulty": "Medium",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Spanish Omelette",
+    "meal_type": "Breakfast; Dinner",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "egg",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Hummus with Pita",
+    "meal_type": "Snack; Lunch",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Falafel Wrap",
+    "meal_type": "Snack; Lunch",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "veg_curry",
+    "difficulty": "Medium",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Baba Ganoush",
+    "meal_type": "Snack; Lunch",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Tabbouleh Salad",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Shawarma (Chicken)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Shawarma (Paneer)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "complete_meal",
+    "food_group": "paneer",
+    "difficulty": "Medium",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Chicken Kebab Plate",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "kabab",
+    "difficulty": "Medium",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Lentil Soup (Shorba)",
+    "meal_type": "Snack; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Easy",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Fattoush Salad",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Grilled Halloumi Salad",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "dairy",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "middle_eastern"
+  },
+  {
+    "name": "Miso Soup with Tofu",
+    "meal_type": "Snack; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Easy",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Edamame",
+    "meal_type": "Snack",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Vegetable Sushi Rolls",
+    "meal_type": "Snack; Lunch",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Salmon Sushi Rolls",
+    "meal_type": "Snack; Lunch",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "fish",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Chicken Teriyaki Bowl",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Tofu Teriyaki Bowl",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "veg_curry",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Miso Glazed Eggplant",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "anchor_veg",
+    "food_group": "veg_curry",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Vegetable Tempura",
+    "meal_type": "Snack; Dinner",
+    "food_type": "veg",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Prawn Tempura",
+    "meal_type": "Snack; Dinner",
+    "food_type": "non-veg",
+    "role": "side",
+    "food_group": "fish",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Ramen (Veg)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "soup",
+    "difficulty": "Hard",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Quinoa Buddha Bowl",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "veg_raw",
+    "difficulty": "Easy",
+    "cuisine": "global"
+  },
+  {
+    "name": "Greek Yogurt Parfait",
+    "meal_type": "Breakfast; Snack",
+    "food_type": "dairy",
+    "role": "complete_meal",
+    "food_group": "dairy",
+    "difficulty": "Easy",
+    "cuisine": "global"
+  },
+  {
+    "name": "Overnight Oats",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "grain_breakfast",
+    "difficulty": "Easy",
+    "cuisine": "global"
+  },
+  {
+    "name": "Avocado Toast",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "toast",
+    "difficulty": "Easy",
+    "cuisine": "global"
+  },
+  {
+    "name": "Smoothie Bowl (Berry)",
+    "meal_type": "Breakfast; Snack",
+    "food_type": "vegan",
+    "role": "beverage",
+    "food_group": "fruit",
+    "difficulty": "Easy",
+    "cuisine": "global"
+  },
+  {
+    "name": "Protein Pancakes",
+    "meal_type": "Breakfast",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "grain_breakfast",
+    "difficulty": "Medium",
+    "cuisine": "global"
+  },
+  {
+    "name": "Banana Oat Pancakes",
+    "meal_type": "Breakfast",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "grain_breakfast",
+    "difficulty": "Easy",
+    "cuisine": "global"
+  },
+  {
+    "name": "Shakshuka (Veg)",
+    "meal_type": "Breakfast; Dinner",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "egg",
+    "difficulty": "Medium",
+    "cuisine": "global"
+  },
+  {
+    "name": "Minestrone (Veg)",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "vegan",
+    "role": "complete_meal",
+    "food_group": "soup",
+    "difficulty": "Medium",
+    "cuisine": "global"
+  },
+  {
+    "name": "Grilled Chicken Breast",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Easy",
+    "cuisine": "global"
+  },
+  {
+    "name": "Keema Matar",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "kabab",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Chicken Saag",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Fish Amritsari",
+    "meal_type": "Snack",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "fish",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Egg Roll",
+    "meal_type": "Snack",
+    "food_type": "egg",
+    "role": "complete_meal",
+    "food_group": "egg",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Stuffed Paratha (Aloo)",
+    "meal_type": "Breakfast",
+    "food_type": "veg",
+    "role": "complete_meal",
+    "food_group": "roti",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Dhokla",
+    "meal_type": "Breakfast; Snack",
+    "food_type": "veg",
+    "role": "side",
+    "food_group": "grain_breakfast",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Khandvi",
+    "meal_type": "Breakfast; Snack",
+    "food_type": "veg",
+    "role": "side",
+    "food_group": "grain_breakfast",
+    "difficulty": "Medium",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Tomato Rasam",
+    "meal_type": "Snack; Dinner",
+    "food_type": "vegan",
+    "role": "side",
+    "food_group": "soup",
+    "difficulty": "Easy",
+    "cuisine": "indian"
+  },
+  {
+    "name": "Kung Pao Chicken",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Mapo Tofu",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "veg",
+    "role": "anchor_protein",
+    "food_group": "veg_curry",
+    "difficulty": "Medium",
+    "cuisine": "chinese"
+  },
+  {
+    "name": "Grilled Salmon",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "fish",
+    "difficulty": "Easy",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Beef Stew",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "kabab",
+    "difficulty": "Hard",
+    "cuisine": "continental"
+  },
+  {
+    "name": "Gyoza (Veg)",
+    "meal_type": "Snack; Dinner",
+    "food_type": "veg",
+    "role": "side",
+    "food_group": "veg_raw",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Chicken Katsu",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "complete_meal",
+    "food_group": "chicken",
+    "difficulty": "Medium",
+    "cuisine": "japanese"
+  },
+  {
+    "name": "Lamb Kofta",
+    "meal_type": "Lunch; Dinner",
+    "food_type": "non-veg",
+    "role": "anchor_protein",
+    "food_group": "kabab",
+    "difficulty": "Medium",
+    "cuisine": "middle_eastern"
+  }
+]

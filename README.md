@@ -1,4 +1,16 @@
-# Indian Diet Tracker — Python/Streamlit
+---
+title: Call Bhaiya
+emoji: 🔥
+colorFrom: green
+colorTo: teal
+sdk: streamlit
+sdk_version: 1.45.0
+app_file: app.py
+python_version: "3.12"
+pinned: false
+---
+
+# Call Bhaiya — Diet Tracker
 
 Personalised multi-user Indian meal planning and logging app.
 Deployed free on Hugging Face Spaces. AI recipe fill + diet nudges run

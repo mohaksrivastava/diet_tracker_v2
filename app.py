@@ -152,6 +152,60 @@ st.markdown("""
   /* ── Disclaimer ── */
   .disclaimer { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px;
                 padding: 14px 18px; font-size: 13px; color: #795548; margin-top: 24px; }
+
+  /* ── Slot recipe list (replaces table on mobile) ── */
+  .recipe-row { display: flex; justify-content: space-between; align-items: baseline;
+                padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+                gap: 8px; flex-wrap: wrap; }
+  .recipe-row:last-child { border-bottom: none; }
+  .recipe-name { font-size: 14px; font-weight: 500; color: #1a1a1a; flex: 1; min-width: 0; }
+  .recipe-macros { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+  /* ── Form widget contrast on linen background ── */
+  /* Text inputs and number inputs */
+  [data-testid="stTextInput"] input,
+  [data-testid="stNumberInput"] input,
+  [data-testid="stTextArea"] textarea {
+    background: white !important;
+    color: #1a1a1a !important;
+    border: 1px solid #ccc !important;
+  }
+  /* Select boxes */
+  [data-testid="stSelectbox"] > div > div,
+  [data-testid="stSelectbox"] > div > div > div {
+    background: white !important;
+    color: #1a1a1a !important;
+  }
+  /* Select box dropdown options */
+  [data-testid="stSelectbox"] li { color: #1a1a1a !important; }
+  /* Multiselect */
+  [data-testid="stMultiSelect"] > div > div {
+    background: white !important;
+    color: #1a1a1a !important;
+  }
+  /* All widget labels in main area */
+  [data-testid="stWidgetLabel"] p,
+  [data-testid="stWidgetLabel"] label,
+  .stRadio label, .stCheckbox label,
+  .stSlider label,
+  [data-baseweb="select"] { color: #1a1a1a !important; }
+  /* Slider track text */
+  [data-testid="stSlider"] [data-testid="stWidgetLabel"] { color: #1a1a1a !important; }
+  /* Caption / small text */
+  [data-testid="stCaptionContainer"] p { color: var(--text-muted) !important; }
+  /* Dataframe text */
+  [data-testid="stDataFrame"] * { color: #1a1a1a !important; }
+
+  /* ── Sidebar secondary button (Log Out) ── */
+  [data-testid="stSidebar"] .stButton > button {
+    background: rgba(255,255,255,0.12) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    border-radius: 8px !important;
+  }
+  [data-testid="stSidebar"] .stButton > button:hover {
+    background: rgba(255,255,255,0.22) !important;
+  }
 </style>
 """, unsafe_allow_html=True)
 
@@ -654,28 +708,25 @@ def plan_page():
                 "fat":      nt.get("fat_hard_hi", 0.25),
                 "carbs":    nt.get("carb_hard_pct", 0.35)}
 
-        d_col1, d_col2, d_col3, d_col4 = st.columns(4)
         macro_items = [
-            (d_col1, "Calories", "calories", plan["total_cal"],
-             f"{plan['total_cal']}", "kcal", "#1D4A2F"),
-            (d_col2, "Protein",  "protein",  plan["protein_g"],
-             f"{plan['protein_g']}", "g",    "#3D5AF1"),
-            (d_col3, "Carbs",    "carbs",    plan["carb_g"],
-             f"{plan['carb_g']}",   "g",    "#43A047"),
-            (d_col4, "Fat",      "fat",      plan["fat_g"],
-             f"{plan['fat_g']}",    "g",    "#E91E8C"),
+            ("Calories", "calories", f"{plan['total_cal']}", "kcal", "#1D4A2F"),
+            ("Protein",  "protein",  f"{plan['protein_g']}", "g",    "#3D5AF1"),
+            ("Carbs",    "carbs",    f"{plan['carb_g']}",    "g",    "#43A047"),
+            ("Fat",      "fat",      f"{plan['fat_g']}",     "g",    "#E91E8C"),
         ]
-        for col, label, key, val, val_str, unit, mc in macro_items:
-            dev   = devs.get(key, 0.0)
-            cls   = _dev_class(dev, soft.get(key, 0.1), hard.get(key, 0.25))
-            sym   = _dev_symbol(dev)
+        row1, row2 = st.columns(2), st.columns(2)
+        for i, (label, key, val_str, unit, mc) in enumerate(macro_items):
+            dev = devs.get(key, 0.0)
+            cls = _dev_class(dev, soft.get(key, 0.1), hard.get(key, 0.25))
+            sym = _dev_symbol(dev)
+            col = (row1 if i < 2 else row2)[i % 2]
             with col:
                 st.markdown(
                     f"<div style='background:#fff;border-radius:12px;padding:12px 10px;"
-                    f"box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;'>"
+                    f"box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;margin-bottom:8px'>"
                     f"<div style='font-size:11px;color:#999;font-weight:600;margin-bottom:4px'>{label}</div>"
                     f"<div style='font-size:18px;font-weight:800;color:{mc}'>{val_str}"
-                    f"<span style='font-size:11px;font-weight:500;color:#aaa'>{unit}</span></div>"
+                    f"<span style='font-size:11px;font-weight:500;color:#aaa'> {unit}</span></div>"
                     f"<div class='{cls}' style='font-size:11px;margin-top:3px'>{sym}</div>"
                     f"</div>",
                     unsafe_allow_html=True
@@ -685,31 +736,29 @@ def plan_page():
 
         # ── Slot cards ────────────────────────────────────────────────────────
         for slot in plan["slots"]:
-            st_type   = slot["type"]
-            css       = SLOT_COLORS[st_type]
-            rows_html = ""
+            st_type    = slot["type"]
+            css        = SLOT_COLORS[st_type]
+            rows_html  = ""
             for r in slot["recipes"]:
-                port_label = f"{r['portion']}×" if r["portion"] != 1.0 else ""
+                port_label = f" &nbsp;<small style='color:#888'>{r['portion']}×</small>" \
+                             if r["portion"] != 1.0 else ""
                 rows_html += (
-                    f"<tr><td>{r['name']} "
-                    f"<small style='color:#888'>{port_label}</small></td>"
-                    f"<td style='text-align:right'>{r['calories_shown']}</td>"
-                    f"<td style='text-align:right'>{r['protein_shown']}g</td>"
-                    f"<td style='text-align:right'>{r['carb_shown']}g</td>"
-                    f"<td style='text-align:right'>{r['fat_shown']}g</td></tr>"
+                    f"<div class='recipe-row'>"
+                    f"<span class='recipe-name'>{r['name']}{port_label}</span>"
+                    f"<span class='recipe-macros'>"
+                    f"{r['calories_shown']} kcal &nbsp;·&nbsp; "
+                    f"P:{r['protein_shown']}g &nbsp;·&nbsp; "
+                    f"C:{r['carb_shown']}g &nbsp;·&nbsp; "
+                    f"F:{r['fat_shown']}g"
+                    f"</span></div>"
                 )
             st.markdown(
                 f'<div class="slot-card {css}">'
-                f'<strong>{SLOT_ICONS[st_type]} {SLOT_LABELS[st_type]}</strong>'
-                f' <span style="color:#666;font-size:13px;">— {slot["total_cal"]} kcal</span>'
-                f'<table style="width:100%;font-size:13px;margin-top:8px;">'
-                f'<thead><tr>'
-                f'<th style="text-align:left">Recipe</th>'
-                f'<th style="text-align:right">Cal</th>'
-                f'<th style="text-align:right">Prot</th>'
-                f'<th style="text-align:right">Carbs</th>'
-                f'<th style="text-align:right">Fat</th>'
-                f'</tr></thead><tbody>{rows_html}</tbody></table></div>',
+                f'<div style="font-weight:700;margin-bottom:10px">'
+                f'{SLOT_ICONS[st_type]} {SLOT_LABELS[st_type]}'
+                f'<span style="color:#666;font-size:13px;font-weight:400">'
+                f' &nbsp;— {slot["total_cal"]} kcal</span></div>'
+                f'{rows_html}</div>',
                 unsafe_allow_html=True
             )
 
@@ -748,13 +797,15 @@ def _customize_panel(pi: int, nt: dict, food_pref: str):
         tf    = (df["base_fat"]  * df["portion"]).sum()
         mc    = max(tp * 4 + tcarb * 4 + tf * 9, 1)
         pct   = int(min(100, tc / max(nt["cal_target"], 1) * 100))
-        col   = _target_color(pct)
-        mc1, mc2, mc3, mc4 = st.columns(4)
+        col = _target_color(pct)
+        # 2×2 macro summary grid (readable on mobile)
+        r1c1, r1c2 = st.columns(2)
+        r2c1, r2c2 = st.columns(2)
         for mcol, lbl, mval, munit, mcolor in [
-            (mc1, "Calories", f"{int(tc)}",        "kcal", "#1D4A2F"),
-            (mc2, "Protein",  f"{tp:.1f}",         "g",    "#3D5AF1"),
-            (mc3, "Carbs",    f"{tcarb:.1f}",      "g",    "#43A047"),
-            (mc4, "Fat",      f"{tf:.1f}",         "g",    "#E91E8C"),
+            (r1c1, "Calories", f"{int(tc)}",   "kcal", "#1D4A2F"),
+            (r1c2, "Protein",  f"{tp:.1f}",    "g",    "#3D5AF1"),
+            (r2c1, "Carbs",    f"{tcarb:.1f}", "g",    "#43A047"),
+            (r2c2, "Fat",      f"{tf:.1f}",    "g",    "#E91E8C"),
         ]:
             with mcol:
                 st.markdown(
@@ -768,70 +819,63 @@ def _customize_panel(pi: int, nt: dict, food_pref: str):
         st.markdown(_macro_bar(pct, col), unsafe_allow_html=True)
         st.markdown("")
 
-    # ── Current items — inline per-row edit and remove ──────────────────────
+    # ── Current items — card-per-row layout (mobile-friendly) ───────────────
     if not df.empty:
-        # Column headers
-        h0, h1, h2, h3, h4, h5, h6, h7 = st.columns([2, 3, 1.4, 1, 1, 1, 1, 1])
-        for col, lbl in zip([h0,h1,h2,h3,h4,h5,h6,h7],
-                            ["Slot","Recipe","Portion","Cal","Prot","Carbs","Fat",""]):
-            col.markdown(f"<small style='color:#888;font-weight:600'>{lbl}</small>",
-                         unsafe_allow_html=True)
-
         for row_i, row in df.iterrows():
-            c0,c1,c2,c3,c4,c5,c6,c7 = st.columns([2, 3, 1.4, 1, 1, 1, 1, 1])
             cal_p  = int(row["base_cal"]  * row["portion"])
             prot_p = round(row["base_prot"] * row["portion"], 1)
             carb_p = round(row["base_carb"] * row["portion"], 1)
             fat_p  = round(row["base_fat"]  * row["portion"], 1)
 
-            c0.markdown(f"<small>{SLOT_LABELS.get(row['slot_type'], row['slot_type'])}</small>",
-                        unsafe_allow_html=True)
-            c1.markdown(f"<small>{row['name']}</small>", unsafe_allow_html=True)
-
-            # Inline portion selector per row
-            cur_port_label = next(
-                (k for k, v in PORTIONS.items() if abs(v - row["portion"]) < 0.01),
-                f"{row['portion']}×"
-            )
-            new_p = c2.selectbox(
-                "", list(PORTIONS.keys()),
-                index=list(PORTIONS.keys()).index(cur_port_label)
-                      if cur_port_label in PORTIONS else 1,
-                key=f"port_inline_{pi}_{row_i}",
-                label_visibility="collapsed"
-            )
-            if PORTIONS[new_p] != row["portion"]:
-                df.at[row_i, "portion"] = PORTIONS[new_p]
-                st.session_state.customize_state[pi] = df
-                st.rerun()
-
-            c3.markdown(f"<small>{cal_p}</small>",  unsafe_allow_html=True)
-            c4.markdown(f"<small>{prot_p}g</small>", unsafe_allow_html=True)
-            c5.markdown(f"<small>{carb_p}g</small>", unsafe_allow_html=True)
-            c6.markdown(f"<small>{fat_p}g</small>",  unsafe_allow_html=True)
-
-            # Remove button — visible inline on every row
-            if c7.button("🗑️", key=f"rm_{pi}_{row_i}",
-                         help=f"Remove {row['name']}"):
-                st.session_state.customize_state[pi] = (
-                    df.drop(row_i).reset_index(drop=True)
+            c_name, c_port, c_rm = st.columns([4, 2, 1])
+            with c_name:
+                st.markdown(
+                    f"**{row['name']}** &nbsp;"
+                    f"<span style='background:var(--linen-dark);padding:1px 7px;"
+                    f"border-radius:10px;font-size:11px'>"
+                    f"{SLOT_LABELS.get(row['slot_type'], row['slot_type'])}</span><br>"
+                    f"<small style='color:var(--text-muted)'>"
+                    f"{cal_p} kcal · P:{prot_p}g · C:{carb_p}g · F:{fat_p}g</small>",
+                    unsafe_allow_html=True
                 )
-                st.rerun()
+            with c_port:
+                cur_port_label = next(
+                    (k for k, v in PORTIONS.items() if abs(v - row["portion"]) < 0.01),
+                    "1×"
+                )
+                new_p = st.selectbox(
+                    "", list(PORTIONS.keys()),
+                    index=list(PORTIONS.keys()).index(cur_port_label)
+                          if cur_port_label in PORTIONS else 1,
+                    key=f"port_inline_{pi}_{row_i}",
+                    label_visibility="collapsed"
+                )
+                if PORTIONS[new_p] != row["portion"]:
+                    df.at[row_i, "portion"] = PORTIONS[new_p]
+                    st.session_state.customize_state[pi] = df
+                    st.rerun()
+            with c_rm:
+                if st.button("🗑️", key=f"rm_{pi}_{row_i}", help=f"Remove {row['name']}"):
+                    st.session_state.customize_state[pi] = (
+                        df.drop(row_i).reset_index(drop=True)
+                    )
+                    st.rerun()
 
         st.markdown("")
 
     st.divider()
     st.markdown("**➕ Add a recipe or ingredient**")
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2 = st.columns(2)
     with c1:
         add_slot = st.selectbox("Add to slot", ["lunch","dinner","breakfast","snack"],
                                 format_func=lambda x: SLOT_LABELS[x], key=f"add_slot_{pi}")
     with c2:
-        diff_f = st.selectbox("Difficulty", ["All","Easy","Medium","Hard"], key=f"diff_{pi}")
-    with c3:
-        time_f = st.selectbox("Cook time", ["All","≤15 min","15-30 min","30+ min"], key=f"time_{pi}")
-    with c4:
         port_f = st.selectbox("Portion", list(PORTIONS.keys()), index=1, key=f"port_new_{pi}")
+    c3, c4 = st.columns(2)
+    with c3:
+        diff_f = st.selectbox("Difficulty", ["All","Easy","Medium","Hard"], key=f"diff_{pi}")
+    with c4:
+        time_f = st.selectbox("Cook time", ["All","≤15 min","15-30 min","30+ min"], key=f"time_{pi}")
 
     kw        = SLOT_LABELS[add_slot]
     allowed   = ALLOWED_TYPES.get(food_pref, ALLOWED_TYPES["non-veg"])

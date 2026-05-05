@@ -4,7 +4,8 @@
 
 import streamlit as st
 import pandas as pd
-from datetime import date
+import altair as alt
+from datetime import date, datetime
 
 from db.connection        import get_connection
 from db.users             import (get_user_by_name, verify_password,
@@ -12,7 +13,9 @@ from db.users             import (get_user_by_name, verify_password,
 from db.recipes           import (get_all_recipes, get_recipe_detail,
                                   add_custom_recipe, get_custom_recipes_for_user,
                                   log_optimizer_run)
-from db.logs              import log_meal, get_today_logs, get_logs_for_date, get_week_summary
+from db.logs              import (log_meal, get_today_logs, get_logs_for_date,
+                                  get_week_summary, compute_streak,
+                                  update_log_entry, delete_log_entry)
 from db.nudges            import get_all_nudges, get_latest_nudge, mark_nudge_seen
 from db.nutrition_targets import (load_or_default_target, save_nutrition_target,
                                   get_default_target)
@@ -29,29 +32,78 @@ st.set_page_config(
 # ── Styles ─────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
 
-  html, body, [class*="css"], .stApp { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+  :root {
+    --green-deep:   #1D4A2F;
+    --green-mid:    #2D6A4F;
+    --green-light:  #52B788;
+    --linen:        #F0EFE9;
+    --linen-dark:   #E8E6DE;
+    --text-primary: #1a1a1a;
+    --text-muted:   #6B7280;
+    --card-bg:      #FFFFFF;
+    --card-radius:  14px;
+    --card-shadow:  0 2px 12px rgba(29,74,47,0.08);
+  }
+
+  html, body, [class*="css"], .stApp { font-family: 'DM Sans', sans-serif !important; }
+  h1, h2 { font-family: 'DM Serif Display', serif !important; }
+
+  /* ── Sidebar ── */
+  [data-testid="stSidebar"] { background: var(--green-deep) !important; }
+  [data-testid="stSidebar"] * { color: #fff !important; }
+  [data-testid="stSidebar"] hr { border-color: rgba(255,255,255,0.2) !important; }
+
+  /* ── Primary button ── */
+  .stButton > button[kind="primary"] {
+    background: var(--green-deep) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+  }
+  .stButton > button[kind="primary"]:hover { background: var(--green-mid) !important; }
+
+  /* ── Card utility ── */
+  .cb-card {
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* ── Responsive grids ── */
+  .cb-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .cb-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  @media (max-width: 900px) {
+    .cb-grid-2 { grid-template-columns: 1fr; }
+    .cb-grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ── Stat card (dashboard + diary) ── */
+  .stat-card  { background: var(--card-bg); border-radius: var(--card-radius);
+                padding: 14px 12px; text-align: center;
+                box-shadow: var(--card-shadow); }
+  .stat-val   { font-size: 22px; font-weight: 800; color: var(--green-deep); }
+  .stat-lbl   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
   /* ── Sidebar brand header ── */
   .cb-brand {
-    text-align: center;
-    padding: 4px 8px 18px;
-    border-bottom: 1px solid rgba(81,103,108,0.15);
-    margin-bottom: 10px;
+    text-align: center; padding: 4px 8px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.15); margin-bottom: 10px;
   }
   .cb-brand-icon { font-size: 38px; line-height: 1.2; }
   .cb-brand-name {
-    font-size: 22px; font-weight: 800; color: #51676c;
+    font-size: 22px; font-weight: 800; color: #fff;
     letter-spacing: -0.5px; margin: 4px 0 2px;
   }
-  .cb-brand-tag { font-size: 11px; color: #aaa; letter-spacing: 0.3px; }
+  .cb-brand-tag { font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 0.3px; }
 
   /* ── User avatar ── */
   .cb-avatar-wrap { text-align: center; padding: 6px 0 18px; }
   .cb-avatar {
     width: 44px; height: 44px; border-radius: 50%;
-    background: #51676c;
+    background: rgba(255,255,255,0.2);
     color: white; font-size: 20px; font-weight: 800;
     display: inline-flex; align-items: center; justify-content: center;
     margin-bottom: 6px;
@@ -60,7 +112,6 @@ st.markdown("""
 
   /* ── Login hero ── */
   .cb-login-hero { text-align: center; padding: 28px 0 20px; }
-  .cb-login-icon { font-size: 68px; line-height: 1; }
   .cb-login-title {
     font-size: 36px; font-weight: 800; letter-spacing: -1px;
     color: #1a1a1a; margin: 6px 0 4px; line-height: 1.1;
@@ -92,18 +143,11 @@ st.markdown("""
   .badge-fair { background: #FFF3E0; color: #E65100; padding: 3px 12px;
                 border-radius: 20px; font-size: 12px; font-weight: 700; }
 
-  /* ── Macro stat cards (Diary page) ── */
-  .stat-card  { background: white; border-radius: 14px; padding: 14px 12px;
-                text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
-  .stat-val   { font-size: 22px; font-weight: 800; color: #51676c; }
-  .stat-lbl   { font-size: 12px; color: #888; margin-top: 2px; }
-
   /* ── Nudge cards ── */
-  .nudge-new  { background: white; border: 1.5px solid rgba(81,103,108,0.3);
+  .nudge-new  { background: white; border: 1.5px solid rgba(29,74,47,0.3);
                 border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; }
   .nudge-seen { background: white; border: 1.5px solid rgba(0,0,0,0.08);
-                border-radius: 12px; padding: 14px 18px; margin-bottom: 12px;
-                opacity: 0.7; }
+                border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; opacity: 0.7; }
 
   /* ── Disclaimer ── */
   .disclaimer { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px;
@@ -157,10 +201,10 @@ def login_page():
         st.markdown("""
         <div class="cb-login-hero">
             <div style="width:80px;height:80px;border-radius:24px;
-                background:#51676c;
+                background:#1D4A2F;
                 display:flex;align-items:center;justify-content:center;
                 font-size:40px;margin:0 auto 14px;
-                box-shadow:0 10px 28px rgba(81,103,108,0.4);">🔥</div>
+                box-shadow:0 10px 28px rgba(29,74,47,0.4);">🔥</div>
             <div class="cb-login-title">Call Bhaiya</div>
             <div class="cb-login-tagline">Only if required, baaki trust this web app</div>
         </div>
@@ -180,9 +224,9 @@ def login_page():
                     st.error("Incorrect username or password.")
 
         st.markdown("""
-        <div style="margin-top:24px;background:white;border:1.5px solid rgba(81,103,108,0.2);
+        <div style="margin-top:24px;background:white;border:1.5px solid rgba(29,74,47,0.15);
             border-radius:14px;padding:18px 20px;">
-          <div style="font-size:13px;font-weight:700;color:#51676c;
+          <div style="font-size:13px;font-weight:700;color:#1D4A2F;
               letter-spacing:0.3px;margin-bottom:12px;">
             A few pointers before you start
           </div>
@@ -212,6 +256,102 @@ def login_page():
           </ul>
         </div>
         """, unsafe_allow_html=True)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DASHBOARD (HOME)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def home_page():
+    uid   = st.session_state.user_id
+    uname = st.session_state.username
+    ud    = st.session_state.user_data
+
+    hour = datetime.now().hour
+    greeting = "Good morning" if hour < 12 else ("Good afternoon" if hour < 18 else "Good evening")
+    st.markdown(
+        f"<h1 style='margin-bottom:2px'>{greeting}, {uname} 👋</h1>"
+        f"<p style='color:var(--text-muted);margin-top:0'>Here's your nutrition snapshot for today.</p>",
+        unsafe_allow_html=True
+    )
+
+    # ── Today's macros ────────────────────────────────────────────────────────
+    today_df = get_today_logs(conn(), uid)
+    nt        = load_or_default_target(conn(), uid, int(ud.get("daily_cal", 1800)))
+    cal_tgt   = int(nt.get("cal_target", ud.get("daily_cal", 1800)))
+    prot_tgt  = int(nt.get("protein_g", 90))
+    carb_tgt  = int(nt.get("carb_g", 225))
+    fat_tgt   = int(nt.get("fat_g", 60))
+
+    if today_df.empty:
+        tc = tp = tcarb = tf = 0
+    else:
+        tc    = int(today_df["calories"].sum())
+        tp    = round(today_df["protein_g"].sum(), 1)
+        tcarb = round(today_df["carb_g"].sum(), 1)
+        tf    = round(today_df["fat_g"].sum(), 1)
+
+    c1, c2, c3, c4 = st.columns(4)
+    for col, val, tgt, lbl, unit in [
+        (c1, tc,    cal_tgt,  "Calories",  "kcal"),
+        (c2, tp,    prot_tgt, "Protein",   "g"),
+        (c3, tcarb, carb_tgt, "Carbs",     "g"),
+        (c4, tf,    fat_tgt,  "Fat",       "g"),
+    ]:
+        with col:
+            st.markdown(
+                f'<div class="stat-card">'
+                f'<div class="stat-val">{val}<span style="font-size:11px;font-weight:400;'
+                f'color:var(--text-muted)"> {unit}</span></div>'
+                f'<div class="stat-lbl">{lbl} <span style="color:var(--text-muted)">/ {tgt} {unit}</span></div>'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+    st.markdown("")
+
+    # ── Streak + week avg ─────────────────────────────────────────────────────
+    streak   = compute_streak(conn(), uid)
+    week_df  = get_week_summary(conn(), uid)
+    week_avg = int(week_df["total_cal"].mean()) if not week_df.empty and "total_cal" in week_df.columns else 0
+
+    sc1, sc2 = st.columns(2)
+    with sc1:
+        st.markdown(
+            f'<div class="cb-card" style="text-align:center">'
+            f'<div style="font-size:2rem;font-weight:600;color:var(--green-deep)">'
+            f'🔥 {streak}</div>'
+            f'<div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;'
+            f'letter-spacing:0.05em">Day streak</div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+    with sc2:
+        st.markdown(
+            f'<div class="cb-card" style="text-align:center">'
+            f'<div style="font-size:2rem;font-weight:600;color:var(--green-deep)">'
+            f'📅 {week_avg}</div>'
+            f'<div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;'
+            f'letter-spacing:0.05em">7-day avg kcal</div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+    # ── Latest nudge ──────────────────────────────────────────────────────────
+    nudges = get_all_nudges(conn(), uid, limit=1)
+    if nudges:
+        n = nudges[0]
+        st.markdown("#### Latest Nudge")
+        css_cls = "nudge-new" if not n["seen"] else "nudge-seen"
+        st.markdown(
+            f'<div class="{css_cls}">'
+            f'<div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">'
+            f'Generated {n["generated_on"]} · {n.get("days_analyzed","?")} day(s) of data</div>'
+            f'<div style="font-size:15px;line-height:1.6">{n["nudge_text"]}</div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.info("No nudges yet — they appear after the nightly analysis (requires at least 1 day of data).")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -517,7 +657,7 @@ def plan_page():
         d_col1, d_col2, d_col3, d_col4 = st.columns(4)
         macro_items = [
             (d_col1, "Calories", "calories", plan["total_cal"],
-             f"{plan['total_cal']}", "kcal", "#51676c"),
+             f"{plan['total_cal']}", "kcal", "#1D4A2F"),
             (d_col2, "Protein",  "protein",  plan["protein_g"],
              f"{plan['protein_g']}", "g",    "#3D5AF1"),
             (d_col3, "Carbs",    "carbs",    plan["carb_g"],
@@ -611,7 +751,7 @@ def _customize_panel(pi: int, nt: dict, food_pref: str):
         col   = _target_color(pct)
         mc1, mc2, mc3, mc4 = st.columns(4)
         for mcol, lbl, mval, munit, mcolor in [
-            (mc1, "Calories", f"{int(tc)}",        "kcal", "#51676c"),
+            (mc1, "Calories", f"{int(tc)}",        "kcal", "#1D4A2F"),
             (mc2, "Protein",  f"{tp:.1f}",         "g",    "#3D5AF1"),
             (mc3, "Carbs",    f"{tcarb:.1f}",      "g",    "#43A047"),
             (mc4, "Fat",      f"{tf:.1f}",         "g",    "#E91E8C"),
@@ -808,12 +948,48 @@ def log_page():
 # MY LOGS
 # ═══════════════════════════════════════════════════════════════════════════════
 
+@st.dialog("Edit Log Entry", width="small")
+def _edit_log_dialog(log_id: int, recipe_name: str, current_meal_type: str,
+                     calories: int, protein_g: float, carb_g: float, fat_g: float):
+    st.markdown(f"**{recipe_name}**")
+    meal_types = ["Breakfast", "Lunch", "Snack", "Dinner"]
+    idx = meal_types.index(current_meal_type) if current_meal_type in meal_types else 1
+    new_meal_type = st.selectbox("Meal type", meal_types, index=idx)
+
+    rdf   = load_recipes()
+    match = rdf[rdf["name"] == recipe_name]
+
+    if not match.empty:
+        r        = match.iloc[0]
+        base_cal = float(r["calories"]) or 1.0
+        approx   = calories / base_cal
+        closest  = min(PORTIONS.keys(), key=lambda k: abs(PORTIONS[k] - approx))
+        new_port = st.select_slider("Portion", options=["0.5×", "1×", "1.5×", "2×"],
+                                    value=closest)
+        p        = PORTIONS[new_port]
+        new_cal  = int(r["calories"]       * p)
+        new_prot = round(r["protein"]      * p, 1)
+        new_carb = round(r["carbohydrate"] * p, 1)
+        new_fat  = round(r["fat"]          * p, 1)
+        st.caption(f"{new_cal} kcal · P:{new_prot}g · C:{new_carb}g · F:{new_fat}g")
+    else:
+        # Recipe no longer in DB — edit macros directly
+        new_cal  = st.number_input("Calories",    value=int(calories),      min_value=0)
+        new_prot = st.number_input("Protein (g)", value=float(protein_g),   min_value=0.0, step=0.5)
+        new_carb = st.number_input("Carbs (g)",   value=float(carb_g),      min_value=0.0, step=0.5)
+        new_fat  = st.number_input("Fat (g)",     value=float(fat_g),       min_value=0.0, step=0.5)
+
+    if st.button("Save", type="primary", use_container_width=True):
+        update_log_entry(conn(), log_id, new_meal_type, new_cal, new_prot, new_carb, new_fat)
+        st.rerun()
+
+
 def logs_page():
     st.title("📖 Food Diary")
     uid = st.session_state.user_id
 
     selected_date = st.date_input(
-        "View logs for",
+        "Select date",
         value=date.today(),
         max_value=date.today(),
         key="logs_page_date",
@@ -822,11 +998,39 @@ def logs_page():
     st.subheader(label)
 
     day_df = get_logs_for_date(conn(), uid, selected_date)
+
     if day_df.empty:
         st.info("Nothing logged for this date.")
     else:
-        st.dataframe(day_df.drop(columns=["id"], errors="ignore"),
-                     use_container_width=True, hide_index=True)
+        # ── Per-row display with edit / delete ────────────────────────────────
+        for _, row in day_df.iterrows():
+            c_info, c_edit, c_del = st.columns([6, 1, 1])
+            with c_info:
+                st.markdown(
+                    f"**{row['recipe_name']}** &nbsp;"
+                    f"<span style='background:var(--linen-dark);padding:2px 9px;"
+                    f"border-radius:12px;font-size:12px;color:var(--text-primary)'>"
+                    f"{row['meal_type']}</span><br>"
+                    f"<small style='color:var(--text-muted)'>"
+                    f"{row['calories']} kcal &nbsp;·&nbsp; "
+                    f"P:{row['protein_g']}g &nbsp;·&nbsp; "
+                    f"C:{row['carb_g']}g &nbsp;·&nbsp; "
+                    f"F:{row['fat_g']}g</small>",
+                    unsafe_allow_html=True
+                )
+            with c_edit:
+                if st.button("✏️", key=f"edit_{row['id']}", help="Edit"):
+                    _edit_log_dialog(int(row["id"]), row["recipe_name"],
+                                     row["meal_type"], row["calories"],
+                                     row["protein_g"], row["carb_g"], row["fat_g"])
+            with c_del:
+                if st.button("🗑️", key=f"del_{row['id']}", help="Delete"):
+                    delete_log_entry(conn(), int(row["id"]))
+                    st.rerun()
+
+        st.markdown("")
+
+        # ── Daily totals ──────────────────────────────────────────────────────
         tc    = day_df["calories"].sum()
         tp    = day_df["protein_g"].sum()
         tcarb = day_df["carb_g"].sum()
@@ -834,10 +1038,10 @@ def logs_page():
         mc    = max(tp*4 + tcarb*4 + tf*9, 1)
         sc1, sc2, sc3, sc4 = st.columns(4)
         for col, val, lbl in [
-            (sc1, f"{tc}", "kcal"),
-            (sc2, f"{tp:.1f}g ({tp*4/mc*100:.0f}%)", "Protein"),
+            (sc1, f"{int(tc)}",                         "kcal"),
+            (sc2, f"{tp:.1f}g ({tp*4/mc*100:.0f}%)",   "Protein"),
             (sc3, f"{tcarb:.1f}g ({tcarb*4/mc*100:.0f}%)", "Carbs"),
-            (sc4, f"{tf:.1f}g ({tf*9/mc*100:.0f}%)", "Fat"),
+            (sc4, f"{tf:.1f}g ({tf*9/mc*100:.0f}%)",   "Fat"),
         ]:
             with col:
                 st.markdown(
@@ -848,15 +1052,56 @@ def logs_page():
                     unsafe_allow_html=True
                 )
 
+    # ── Add a meal ────────────────────────────────────────────────────────────
+    st.markdown("")
+    with st.expander(f"➕ Add a meal to {label.lower()}"):
+        rdf = load_recipes()
+        with st.form(f"add_log_{selected_date}"):
+            new_meal_type = st.radio(
+                "Meal type", ["Breakfast", "Lunch", "Snack", "Dinner"], horizontal=True
+            )
+            new_recipe  = st.selectbox("Recipe / Ingredient", sorted(rdf["name"].tolist()))
+            new_portion = st.select_slider("Portion", options=["0.5×", "1×", "1.5×", "2×"],
+                                           value="1×")
+            if st.form_submit_button("➕ Add", type="primary", use_container_width=True):
+                r = rdf[rdf["name"] == new_recipe].iloc[0]
+                p = PORTIONS[new_portion]
+                log_meal(conn(), uid, selected_date, new_recipe, new_meal_type,
+                         int(r["calories"] * p), round(r["protein"] * p, 1),
+                         round(r["carbohydrate"] * p, 1), round(r["fat"] * p, 1))
+                st.success(f"✓ Added: {new_recipe} ({new_portion})")
+                st.rerun()
+
+    # ── 7-day chart ───────────────────────────────────────────────────────────
     st.divider()
-    st.subheader("7-Day Summary")
+    st.subheader("7-Day Calories")
     week_df = get_week_summary(conn(), uid)
     if week_df.empty:
         st.info("No data for the past 7 days.")
     else:
-        st.dataframe(week_df, use_container_width=True, hide_index=True)
         if "total_cal" in week_df.columns:
-            st.bar_chart(week_df.set_index("log_date")["total_cal"])
+            wdf = week_df.copy()
+            wdf["is_today"] = wdf["log_date"].astype(str) == str(date.today())
+            chart = (
+                alt.Chart(wdf)
+                .mark_bar(cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
+                .encode(
+                    x=alt.X("log_date:O", title="Date", axis=alt.Axis(labelAngle=-30)),
+                    y=alt.Y("total_cal:Q", title="Calories"),
+                    color=alt.condition(
+                        alt.datum.is_today,
+                        alt.value("#1D4A2F"),
+                        alt.value("#52B788")
+                    ),
+                    tooltip=["log_date:O", "total_cal:Q",
+                             alt.Tooltip("total_prot:Q", title="Protein (g)"),
+                             alt.Tooltip("total_carb:Q", title="Carbs (g)"),
+                             alt.Tooltip("total_fat:Q",  title="Fat (g)")]
+                )
+                .properties(height=220)
+            )
+            st.altair_chart(chart, use_container_width=True)
+        st.dataframe(week_df, use_container_width=True, hide_index=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -956,10 +1201,10 @@ def settings_page():
     food_label = FOOD_PREFS.get(ud.get("food_pref", "veg"), "Vegetarian")
 
     st.markdown(
-        f'<div style="background:linear-gradient(135deg,#51676c,rgba(81,103,108,0.75));'
+        f'<div style="background:linear-gradient(135deg,#1D4A2F,rgba(45,106,79,0.85));'
         f'border-radius:20px;padding:20px 22px;margin-bottom:24px;'
         f'display:flex;align-items:center;gap:16px;'
-        f'box-shadow:0 8px 24px rgba(81,103,108,0.35);">'
+        f'box-shadow:0 8px 24px rgba(29,74,47,0.35);">'
         f'<div style="width:54px;height:54px;border-radius:16px;'
         f'background:rgba(255,255,255,0.25);display:flex;align-items:center;'
         f'justify-content:center;font-size:24px;font-weight:800;color:#fff;'
@@ -1121,10 +1366,6 @@ def main():
         login_page()
         return
 
-    nudge = get_latest_nudge(conn(), st.session_state.user_id, seen=False)
-    if nudge:
-        st.info("🔔 You have a new nudge — check **Nudges** in the sidebar.")
-
     with st.sidebar:
         st.markdown("""
         <div class="cb-brand">
@@ -1142,6 +1383,7 @@ def main():
             unsafe_allow_html=True
         )
         page = st.radio("", [
+            "🏠 Home",
             "🗓️ Meal Plan",
             "✍️ Log Meal",
             "📖 Food Diary",
@@ -1155,6 +1397,7 @@ def main():
             st.rerun()
 
     {
+        "🏠 Home":       home_page,
         "🗓️ Meal Plan":  plan_page,
         "✍️ Log Meal":   log_page,
         "📖 Food Diary": logs_page,

@@ -37,6 +37,29 @@ def get_logs_for_date(conn, user_id: int, log_date: date) -> pd.DataFrame:
     return pd.DataFrame([dict(r) for r in rows]) if rows else pd.DataFrame()
 
 
+def compute_streak(conn, user_id: int) -> int:
+    """Return the current consecutive-day logging streak (0 if nothing logged today or yesterday)."""
+    rows = execute(conn,
+        """SELECT DISTINCT log_date
+           FROM meal_logs
+           WHERE user_id = %s AND log_date <= CURRENT_DATE
+           ORDER BY log_date DESC
+           LIMIT 60""",
+        (user_id,), fetch="all")
+    if not rows:
+        return 0
+    dates = sorted([r["log_date"] for r in rows], reverse=True)
+    streak = 0
+    expected = date.today()
+    for d in dates:
+        if d == expected:
+            streak += 1
+            expected -= timedelta(days=1)
+        else:
+            break
+    return streak
+
+
 def get_week_summary(conn, user_id: int) -> pd.DataFrame:
     start = str(date.today() - timedelta(days=6))
     rows = execute(conn,
@@ -74,6 +97,15 @@ def get_last_n_days_logs(conn, user_id: int, n: int = 5) -> pd.DataFrame:
         (user_id, start, str(date.today()), n), fetch="all")
     df = pd.DataFrame([dict(r) for r in rows]) if rows else pd.DataFrame()
     return df.sort_values("log_date") if not df.empty else df
+
+
+def update_log_entry(conn, log_id: int, meal_type: str, calories: int,
+                     protein_g: float, carb_g: float, fat_g: float):
+    execute(conn,
+        """UPDATE meal_logs
+           SET meal_type=%s, calories=%s, protein_g=%s, carb_g=%s, fat_g=%s
+           WHERE id=%s""",
+        (meal_type, int(calories), float(protein_g), float(carb_g), float(fat_g), log_id))
 
 
 def delete_log_entry(conn, log_id: int):

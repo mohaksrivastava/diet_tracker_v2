@@ -1,6 +1,6 @@
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-function getToken() { return localStorage.getItem("token"); }
+export function getToken() { return localStorage.getItem("token"); }
 export function setToken(t) { localStorage.setItem("token", t); }
 export function clearToken() { localStorage.removeItem("token"); }
 export function getStoredUser() {

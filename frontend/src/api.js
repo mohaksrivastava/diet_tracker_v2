@@ -14,10 +14,15 @@ async function req(path, opts = {}) {
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}${path}`, { ...opts, headers });
   if (res.status === 401) {
-    clearToken();
-    localStorage.removeItem("user");
-    window.location.href = "/";
-    return;
+    // Only redirect on session expiry (had a token). For login failures, throw so the form shows the error.
+    if (token) {
+      clearToken();
+      localStorage.removeItem("user");
+      window.location.href = "/";
+      return;
+    }
+    const err = await res.json().catch(() => ({ detail: "Invalid credentials" }));
+    throw err;
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));

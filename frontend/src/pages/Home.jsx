@@ -19,7 +19,7 @@ function MacroBar({ label, val, target, color }) {
   );
 }
 
-export default function Home({ user, setPage, onNudgeCount }) {
+export default function Home({ user, setPage, onNudgeCount, onLogout }) {
   const [logs, setLogs]         = useState([]);
   const [streak, setStreak]     = useState(0);
   const [weekData, setWeekData] = useState([]);
@@ -44,6 +44,11 @@ export default function Home({ user, setPage, onNudgeCount }) {
         onNudgeCount?.(unread.length);
         if (nudgesData?.length) setNudge(nudgesData[0]);
       } catch (e) {
+        // If token expired/invalid, log out cleanly via React state
+        if (e?.detail?.toLowerCase?.().includes("invalid") || e?.detail?.toLowerCase?.().includes("expired")) {
+          onLogout?.();
+          return;
+        }
         console.error(e);
       } finally {
         setLoading(false);

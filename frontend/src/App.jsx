@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./style.css";
-import { getStoredUser, clearToken } from "./api.js";
+import { getStoredUser, clearToken, getToken } from "./api.js";
 import Login from "./pages/Login.jsx";
 import Home from "./pages/Home.jsx";
 import Plan from "./pages/Plan.jsx";
@@ -25,7 +25,14 @@ function App() {
 
   useEffect(() => {
     const stored = getStoredUser();
-    if (stored) setUser(stored);
+    const token  = getToken();
+    // Only restore session if both user object and token exist
+    if (stored && token) setUser(stored);
+    else {
+      // Clear any partial/stale state
+      clearToken();
+      localStorage.removeItem("user");
+    }
   }, []);
 
   function handleLogin(userData) {

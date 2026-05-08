@@ -12,7 +12,7 @@ pinned: false
 
 # Call Bhaiya — Diet Tracker
 
-Personalised multi-user Indian meal planning and logging app.
+Personalised multi-user meal planning and logging app.
 Deployed free on Hugging Face Spaces. AI recipe fill + diet nudges run
 overnight via Windows Task Scheduler on a local machine.
 

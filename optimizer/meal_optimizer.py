@@ -221,10 +221,13 @@ def _gap_fill(plan, fillers_df, nt, food_pref):
     gap_carb = nt["carb_g"]     - plan["carb_g"]
     gap_fat  = nt["fat_g"]      - plan["fat_g"]
 
-    deficits = {"protein":gap_prot, "carb":gap_carb, "fat":gap_fat}
-    dominant = max(deficits, key=lambda k: deficits[k])
-    if deficits[dominant] < GAP_FILLER_MIN_GAP_G: return plan
-    if gap_cal < -GAP_FILLER_MAX_OVERSHOOT:        return plan
+    if gap_cal < -GAP_FILLER_MAX_OVERSHOOT: return plan
+    if gap_prot > GAP_FILLER_MIN_GAP_G:
+        dominant = "protein"
+    else:
+        deficits = {"carb": gap_carb, "fat": gap_fat}
+        if max(deficits.values()) < GAP_FILLER_MIN_GAP_G: return plan
+        dominant = max(deficits, key=lambda k: deficits[k])
 
     allowed = set(ALLOWED_TYPES.get(food_pref, ALLOWED_TYPES["non-veg"]))
     pool    = fillers_df[fillers_df["food_type"].isin(allowed)]
@@ -344,8 +347,8 @@ def _macro_pen(cal,pg,fg,cg,t):
     cal_dev=np.maximum(0,np.abs(cal-t["cal_target"])/t["cal_target"]-t.get("cal_soft_pct",0.08))
     pen+=t.get("k_cal",1000)*cal_dev**2
     pu=np.maximum(0,(t["protein_g"]*(1-t.get("protein_soft_lo",0.05))-pg)/t["protein_g"])
-    po=np.maximum(0,(pg-t["protein_g"]*1.20)/t["protein_g"])
-    pen+=kp*pu**2+(kp/4)*po**2
+    po=np.maximum(0,(pg-t["protein_g"]*(1+t.get("protein_soft_hi",0.25)))/t["protein_g"])
+    pen+=kp*pu**2+(kp/8)*po**2
     fo=np.maximum(0,(fg-t["fat_g"]*(1+t.get("fat_soft_hi",0.10)))/t["fat_g"])
     fu=np.maximum(0,(t["fat_g"]*0.60-fg)/t["fat_g"])
     pen+=t.get("k_fat_over",1500)*fo**2+200*fu**2

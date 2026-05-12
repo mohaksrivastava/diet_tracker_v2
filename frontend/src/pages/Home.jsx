@@ -19,6 +19,81 @@ function MacroBar({ label, val, target, color }) {
   );
 }
 
+function WeekChart({ weekData, targetCal }) {
+  const today = new Date();
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - 6 + i);
+    return d.toISOString().slice(0, 10);
+  });
+
+  const lookup = {};
+  (weekData || []).forEach(r => { lookup[r.log_date] = Math.round(r.total_cal || 0); });
+  const vals = days.map(d => lookup[d] || 0);
+
+  const DAY_ABBR = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  const labels = days.map(d => DAY_ABBR[new Date(d + "T12:00:00").getDay()]);
+
+  const W = 300, H = 130;
+  const PAD = { t: 18, b: 28, l: 6, r: 36 };
+  const cW = W - PAD.l - PAD.r;
+  const cH = H - PAD.t - PAD.b;
+
+  const maxVal = Math.max(targetCal * 1.3, ...vals, 1);
+  const step   = cW / 7;
+  const barW   = step * 0.55;
+  const scaleY = v => cH * (1 - v / maxVal);
+  const targetY = PAD.t + scaleY(targetCal);
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`}>
+      {vals.map((v, i) => {
+        const cx = PAD.l + i * step + step / 2;
+        const bH = (v / maxVal) * cH;
+        const y  = PAD.t + scaleY(v);
+        const isToday = i === 6;
+        return (
+          <g key={i}>
+            <rect x={cx - barW / 2} y={PAD.t} width={barW} height={cH}
+                  fill="var(--linen-dark)" rx={3} opacity={0.35} />
+            {v > 0 && (
+              <rect x={cx - barW / 2} y={y} width={barW} height={bH}
+                    fill={isToday ? "var(--green-deep)" : "var(--green-light)"}
+                    rx={3} />
+            )}
+            {isToday && v > 0 && (
+              <text x={cx} y={y - 4} textAnchor="middle"
+                    fontSize={8} fontWeight="700" fill="var(--green-deep)">
+                {v}
+              </text>
+            )}
+          </g>
+        );
+      })}
+
+      <line x1={PAD.l} y1={targetY} x2={W - PAD.r} y2={targetY}
+            stroke="var(--green-deep)" strokeWidth={1.5}
+            strokeDasharray="4,3" opacity={0.6} />
+      <text x={W - PAD.r + 4} y={targetY + 4}
+            fontSize={8} fill="var(--green-deep)" opacity={0.7}>
+        {targetCal}
+      </text>
+
+      {labels.map((lbl, i) => {
+        const cx = PAD.l + i * step + step / 2;
+        return (
+          <text key={i} x={cx} y={H - PAD.b + 14} textAnchor="middle"
+                fontSize={9.5}
+                fill={i === 6 ? "var(--green-deep)" : "var(--text-muted)"}
+                fontWeight={i === 6 ? "700" : "400"}>
+            {lbl}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
 export default function Home({ user, setPage, onNudgeCount, onLogout }) {
   const [logs, setLogs]         = useState([]);
   const [streak, setStreak]     = useState(0);
@@ -44,8 +119,8 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
         onNudgeCount?.(unread.length);
         if (nudgesData?.length) setNudge(nudgesData[0]);
       } catch (e) {
-        // If token expired/invalid, log out cleanly via React state
-        if (e?.detail?.toLowerCase?.().includes("invalid") || e?.detail?.toLowerCase?.().includes("expired")) {
+        if (e?.detail?.toLowerCase?.().includes("invalid") ||
+            e?.detail?.toLowerCase?.().includes("expired")) {
           onLogout?.();
           return;
         }
@@ -77,7 +152,7 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
         <h1 className="page-title">Good day, {user.name.split(" ")[0]} 👋</h1>
       </div>
 
-      {/* Calories stat */}
+      {/* Today's Calories */}
       <div className="card" style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between",
                       alignItems: "flex-end", marginBottom: 12 }}>
@@ -108,16 +183,16 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
                   target={Math.round(targetCal * 0.30 / 4)}
                   color="var(--protein)" />
         <div style={{ marginTop: 6 }} />
-        <MacroBar label="Carbs"   val={totalCarb}
+        <MacroBar label="Carbs" val={totalCarb}
                   target={Math.round(targetCal * 0.50 / 4)}
                   color="var(--carbs)" />
         <div style={{ marginTop: 6 }} />
-        <MacroBar label="Fat"     val={totalFat}
+        <MacroBar label="Fat" val={totalFat}
                   target={Math.round(targetCal * 0.20 / 9)}
                   color="var(--fat)" />
       </div>
 
-      {/* Streak + avg */}
+      {/* Streak + 7-day avg */}
       <div className="stat-grid-2">
         <div className="stat-card">
           <div className="stat-label">Streak</div>
@@ -129,6 +204,12 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
           <div className="stat-val">{avgCal}</div>
           <div className="stat-sub">kcal/day</div>
         </div>
+      </div>
+
+      {/* 7-day performance chart */}
+      <div className="card">
+        <div className="card-title">7-Day Performance</div>
+        <WeekChart weekData={weekData} targetCal={targetCal} />
       </div>
 
       {/* Latest nudge */}
@@ -143,18 +224,6 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
           </div>
         </>
       )}
-
-      {/* Quick actions */}
-      <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-        <button className="btn btn-primary" style={{ flex: 1 }}
-                onClick={() => setPage("plan")}>
-          🗓️ Generate Plan
-        </button>
-        <button className="btn btn-secondary" style={{ flex: 1 }}
-                onClick={() => setPage("diary")}>
-          📖 View Diary
-        </button>
-      </div>
     </div>
   );
 }

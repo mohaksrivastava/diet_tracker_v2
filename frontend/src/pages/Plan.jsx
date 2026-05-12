@@ -16,7 +16,9 @@ const FOOD_PREFS = [
   { val: "non-veg", label: "Non-veg" },
 ];
 
-function SlotCard({ slot, slotType }) {
+function SlotCard({ slot, slotType, recipes, onUpdateRecipe, onRemoveRecipe, onAddRecipe }) {
+  const [addRecipeId, setAddRecipeId] = useState("");
+
   return (
     <div className="slot-card">
       <div className="slot-header" style={{ background: SLOT_COLORS[slotType] || "#888" }}>
@@ -30,16 +32,54 @@ function SlotCard({ slot, slotType }) {
       </div>
       <div className="slot-body">
         {slot.recipes?.map((r, i) => (
-          <div key={i} className="recipe-row">
-            <span className="recipe-name">
-              {r.name}{r.portion && r.portion !== 1 ? ` (${r.portion}×)` : ""}
-            </span>
-            <span className="recipe-macros">
-              {Math.round(r.calories_shown || r.calories * (r.portion||1))} kcal ·
-              P:{Math.round((r.protein_shown || r.protein * (r.portion||1)))}g
-            </span>
+          <div key={i} className="recipe-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <span className="recipe-name">
+                {r.name}
+              </span>
+              <span className="recipe-macros" style={{ display: 'block', fontSize: '0.85em', color: 'var(--text-muted)' }}>
+                {Math.round(r.calories * (r.portion||1))} kcal ·
+                P:{Math.round((r.protein * (r.portion||1)))}g
+              </span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button onClick={() => onUpdateRecipe(slotType, i, Math.max(0.25, (r.portion||1) - 0.25))}
+                      style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #ccc' }}>-</button>
+              <span style={{ minWidth: '30px', textAlign: 'center' }}>{r.portion || 1}×</span>
+              <button onClick={() => onUpdateRecipe(slotType, i, (r.portion||1) + 0.25)}
+                      style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #ccc' }}>+</button>
+              <button onClick={() => onRemoveRecipe(slotType, i)}
+                      style={{ padding: '2px 8px', borderRadius: '4px', border: '1px solid #ff4d4f', color: '#ff4d4f', marginLeft: '8px' }}>✕</button>
+            </div>
           </div>
         ))}
+
+        <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+          <select
+            className="form-select"
+            value={addRecipeId}
+            onChange={(e) => setAddRecipeId(e.target.value)}
+            style={{ flex: 1, padding: '4px 8px', fontSize: '0.9em' }}
+          >
+            <option value="">Add recipe...</option>
+            {recipes?.map((r, i) => (
+              <option key={i} value={r.name}>{r.name}</option>
+            ))}
+          </select>
+          <button
+            className="btn btn-secondary"
+            style={{ padding: '4px 12px', fontSize: '0.9em' }}
+            onClick={() => {
+              if (addRecipeId) {
+                onAddRecipe(slotType, addRecipeId);
+                setAddRecipeId("");
+              }
+            }}
+            disabled={!addRecipeId}
+          >
+            Add
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -69,6 +109,7 @@ export default function Plan({ user, setPage }) {
   const [recipes,   setRecipes]   = useState([]);
   const [plans,     setPlans]     = useState([]);
   const [activePlan, setActivePlan] = useState(0);
+  const [activePlanData, setActivePlanData] = useState(null);
   const [loading,   setLoading]   = useState(false);
   const [initLoading, setInitLoading] = useState(true);
   const [error,     setError]     = useState("");
@@ -77,6 +118,9 @@ export default function Plan({ user, setPage }) {
   // Controls
   const [numMeals, setNumMeals] = useState(user.num_meals || 3);
   const [foodPref, setFoodPref] = useState(user.food_pref || "veg");
+  const [cuisineFilter, setCuisineFilter] = useState("any");
+
+  const cuisines = ["any", ...new Set(recipes.map(r => r.cuisine).filter(Boolean))];
 
   useEffect(() => {
     async function load() {
@@ -118,9 +162,11 @@ export default function Plan({ user, setPage }) {
         food_pref: foodPref,
         target_cal: settings.user.daily_cal,
         nutrition_target: nt,
+        cuisine_filter: cuisineFilter,
       });
       setPlans(result.plans || []);
       setActivePlan(0);
+      setActivePlanData(result.plans?.[0] || null);
     } catch(e) {
       setError(e?.detail || "Failed to generate plan.");
     } finally {
@@ -128,9 +174,75 @@ export default function Plan({ user, setPage }) {
     }
   }
 
+  useEffect(() => {
+    setActivePlanData(plans[activePlan] ? JSON.parse(JSON.stringify(plans[activePlan])) : null);
+  }, [activePlan, plans]);
+
+  function recalculateMacros(updatedPlan) {
+    let totalCal = 0, totalProt = 0, totalCarb = 0, totalFat = 0;
+
+    Object.values(updatedPlan.slots).forEach(slot => {
+      let slotCal = 0, slotProt = 0, slotCarb = 0, slotFat = 0;
+      (slot.recipes || []).forEach(r => {
+        const portion = r.portion || 1;
+        slotCal += r.calories * portion;
+        slotProt += r.protein * portion;
+        slotCarb += (r.carbohydrate || r.carb || 0) * portion;
+        slotFat += r.fat * portion;
+      });
+      slot.total_cal = slotCal;
+      totalCal += slotCal;
+      totalProt += slotProt;
+      totalCarb += slotCarb;
+      totalFat += slotFat;
+    });
+
+    updatedPlan.total_cal = totalCal;
+    updatedPlan.protein_g = totalProt;
+    updatedPlan.carb_g = totalCarb;
+    updatedPlan.fat_g = totalFat;
+    return updatedPlan;
+  }
+
+  function handleUpdateRecipe(slotType, recipeIndex, newPortion) {
+    if (!activePlanData) return;
+    const newPlan = { ...activePlanData };
+    newPlan.slots[slotType].recipes[recipeIndex].portion = newPortion;
+    delete newPlan.slots[slotType].recipes[recipeIndex].calories_shown;
+    delete newPlan.slots[slotType].recipes[recipeIndex].protein_shown;
+    delete newPlan.slots[slotType].recipes[recipeIndex].carb_shown;
+    delete newPlan.slots[slotType].recipes[recipeIndex].fat_shown;
+    setActivePlanData(recalculateMacros(newPlan));
+  }
+
+  function handleRemoveRecipe(slotType, recipeIndex) {
+    if (!activePlanData) return;
+    const newPlan = { ...activePlanData };
+    newPlan.slots[slotType].recipes.splice(recipeIndex, 1);
+    setActivePlanData(recalculateMacros(newPlan));
+  }
+
+  function handleAddRecipe(slotType, recipeName) {
+    if (!activePlanData) return;
+    const recipeTemplate = recipes.find(r => r.name === recipeName);
+    if (!recipeTemplate) return;
+
+    const newPlan = { ...activePlanData };
+    if (!newPlan.slots[slotType].recipes) {
+      newPlan.slots[slotType].recipes = [];
+    }
+
+    newPlan.slots[slotType].recipes.push({
+      ...recipeTemplate,
+      portion: 1
+    });
+
+    setActivePlanData(recalculateMacros(newPlan));
+  }
+
   async function logAll() {
-    if (!plans[activePlan]) return;
-    const plan = plans[activePlan];
+    if (!activePlanData) return;
+    const plan = activePlanData;
     const today = new Date().toISOString().slice(0, 10);
     const entries = [];
 
@@ -159,7 +271,7 @@ export default function Plan({ user, setPage }) {
 
   if (initLoading) return <div className="page loading-center"><span className="spinner" /></div>;
 
-  const plan = plans[activePlan];
+  const plan = activePlanData;
   const nt   = settings?.nutrition_target;
 
   return (
@@ -201,6 +313,18 @@ export default function Plan({ user, setPage }) {
               ))}
             </select>
           </div>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <div className="form-label" style={{ marginBottom: 6 }}>Cuisine Filter</div>
+          <select className="form-select" style={{ padding: "7px 10px" }}
+                  value={cuisineFilter} onChange={e => setCuisineFilter(e.target.value)}>
+            {cuisines.map(c => (
+              <option key={c} value={c}>
+                {c === "any" ? "Any Cuisine" : c.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+              </option>
+            ))}
+          </select>
         </div>
 
         <button className="btn btn-primary btn-full" onClick={generate}
@@ -246,7 +370,15 @@ export default function Plan({ user, setPage }) {
 
               {/* Slot cards */}
               {Object.entries(plan.slots || {}).map(([slotType, slot]) => (
-                <SlotCard key={slotType} slotType={slotType} slot={slot} />
+                <SlotCard
+                  key={slotType}
+                  slotType={slotType}
+                  slot={slot}
+                  recipes={recipes}
+                  onUpdateRecipe={handleUpdateRecipe}
+                  onRemoveRecipe={handleRemoveRecipe}
+                  onAddRecipe={handleAddRecipe}
+                />
               ))}
 
               <button className="btn btn-primary btn-full"

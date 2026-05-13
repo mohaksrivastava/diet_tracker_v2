@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component } from "react";
 import "./style.css";
 import { getStoredUser, clearToken, getToken } from "./api.js";
 import Login from "./pages/Login.jsx";
@@ -8,6 +8,27 @@ import Log from "./pages/Log.jsx";
 import Diary from "./pages/Diary.jsx";
 import Nudges from "./pages/Nudges.jsx";
 import Settings from "./pages/Settings.jsx";
+
+class ErrorBoundary extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(e) { return { error: e }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="page" style={{ paddingTop: 40 }}>
+          <div className="alert alert-error" style={{ marginBottom: 16 }}>
+            Something went wrong: {this.state.error.message}
+          </div>
+          <button className="btn btn-secondary btn-full"
+                  onClick={() => this.setState({ error: null })}>
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const TABS = [
   { id: "home",     label: "Home",   icon: "🏠" },
@@ -55,13 +76,15 @@ function App() {
 
   return (
     <>
-      <PageComponent
-        user={user}
-        setUser={setUser}
-        setPage={setPage}
-        onLogout={handleLogout}
-        onNudgeCount={setNudgeCount}
-      />
+      <ErrorBoundary key={page}>
+        <PageComponent
+          user={user}
+          setUser={setUser}
+          setPage={setPage}
+          onLogout={handleLogout}
+          onNudgeCount={setNudgeCount}
+        />
+      </ErrorBoundary>
 
       <nav className="tab-bar">
         {TABS.map((tab) => {

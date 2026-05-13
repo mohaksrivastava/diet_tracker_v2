@@ -164,7 +164,7 @@ function MacroRow({ label, val, target, color }) {
   );
 }
 
-export default function Plan({ user, setPage }) {
+export default function Plan({ user, setPage, onLogout }) {
   const [settings,     setSettings]     = useState(null);
   const [plans,        setPlans]        = useState([]);
   const [activePlan,   setActivePlan]   = useState(0);
@@ -182,15 +182,25 @@ export default function Plan({ user, setPage }) {
   useEffect(() => {
     async function load() {
       try {
-        const s = await getSettings();
+        const timeout = new Promise((_, rej) =>
+          setTimeout(() => rej(new Error("timeout")), 15000));
+        const s = await Promise.race([getSettings(), timeout]);
         setSettings(s);
         if (s?.user) {
-          setNumMeals(s.user.num_meals);
-          setFoodPref(s.user.food_pref);
-          setTargetCal(s.user.daily_cal);
+          setNumMeals(s.user.num_meals || user.num_meals || 3);
+          setFoodPref(s.user.food_pref || user.food_pref || "non-veg");
+          setTargetCal(s.user.daily_cal ?? user.daily_cal ?? 2000);
         }
-      } catch (e) { console.error(e); }
-      finally { setInitLoading(false); }
+      } catch (e) {
+        if (e?.detail?.toLowerCase?.().includes("invalid") ||
+            e?.detail?.toLowerCase?.().includes("expired")) {
+          onLogout?.();
+          return;
+        }
+        console.error("settings load failed:", e.message || e);
+      } finally {
+        setInitLoading(false);
+      }
     }
     load();
   }, []);
@@ -357,7 +367,7 @@ export default function Plan({ user, setPage }) {
           </div>
           <input type="range" className="cal-slider"
                  min={1000} max={3500} step={50}
-                 value={targetCal}
+                 value={targetCal ?? (user.daily_cal || 2000)}
                  onChange={e => setTargetCal(Number(e.target.value))} />
           <div style={{ display: "flex", justifyContent: "space-between",
                         fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>
@@ -366,7 +376,7 @@ export default function Plan({ user, setPage }) {
         </div>
 
         <button className="btn btn-primary btn-full" onClick={generate}
-                disabled={loading || !settings}>
+                disabled={loading}>
           {loading
             ? <><span className="spinner" style={{ marginRight: 8 }} />Generating…</>
             : "✨ Generate Plans"}

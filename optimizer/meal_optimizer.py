@@ -343,12 +343,12 @@ def _scale_hard(t, mult):
     return out
 
 def _macro_pen(cal,pg,fg,cg,t):
-    pen=np.zeros(len(cal)); kp=t.get("k_protein_under",2000)
+    pen=np.zeros(len(cal)); kp=t.get("k_protein_under",2500)
     cal_dev=np.maximum(0,np.abs(cal-t["cal_target"])/t["cal_target"]-t.get("cal_soft_pct",0.08))
     pen+=t.get("k_cal",1000)*cal_dev**2
     pu=np.maximum(0,(t["protein_g"]*(1-t.get("protein_soft_lo",0.05))-pg)/t["protein_g"])
-    po=np.maximum(0,(pg-t["protein_g"]*(1+t.get("protein_soft_hi",0.25)))/t["protein_g"])
-    pen+=kp*pu**2+(kp/8)*po**2
+    po=np.maximum(0,(pg-t["protein_g"]*1.25)/t["protein_g"])
+    pen+=kp*pu**2+(kp/4)*po**2
     fo=np.maximum(0,(fg-t["fat_g"]*(1+t.get("fat_soft_hi",0.10)))/t["fat_g"])
     fu=np.maximum(0,(t["fat_g"]*0.60-fg)/t["fat_g"])
     pen+=t.get("k_fat_over",1500)*fo**2+200*fu**2

@@ -52,6 +52,8 @@ export const deleteLog = (id) => req(`/logs/${id}`, { method: "DELETE" });
 export const getNudges = () => req("/nudges");
 export const markNudgeSeen = (id) => req(`/nudges/${id}/seen`, { method: "PUT" });
 
+export const getPreflight = () => req("/optimizer/preflight");
+
 export const getSettings = () => req("/settings");
 export const saveProfile = (body) =>
   req("/settings/profile", { method: "PUT", body: JSON.stringify(body) });

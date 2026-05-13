@@ -69,6 +69,17 @@ export default function Login({ onLogin }) {
           </button>
         </form>
       </div>
+
+      <div className="pointers-card">
+        <div className="pointers-title">A few pointers before you start:</div>
+        <ol className="pointers-list">
+          <li>The app is optimized to best meet your nutrition target and not for your tongue. Some pairings may feel weird to eat — swap them out yourself to see how it affects your daily nutrition targets.</li>
+          <li>Don't stress on achieving the perfect balance every day. Follow the nudges (activates once you've entered data for 7 days) and let the weekly averages work it out.</li>
+          <li>Can't find the dish you want? Add it in Add Recipe. It'll be there from next time.</li>
+          <li>Don't add alcoholic beverages for now. Will add that as soon as I figure it out myself.</li>
+          <li>Use diligently for best results. You miss out, you go farther from your goals. Your loss in the end — the world will keep spinning the same anyway.</li>
+        </ol>
+      </div>
     </div>
   );
 }

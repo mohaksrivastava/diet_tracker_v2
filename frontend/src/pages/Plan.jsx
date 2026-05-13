@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getSettings, runOptimizer, addLog, getRecipeDetail, getRecipes } from "../api.js";
+import { getSettings, runOptimizer, addLog, getRecipeDetail, getRecipes, getPreflight } from "../api.js";
 
 const FOOD_PREFS = [
   { val: "vegan",   label: "Vegan" },
@@ -200,6 +200,8 @@ export default function Plan({ user, setPage, onLogout }) {
   const [logSuccess,     setLogSuccess]     = useState(false);
   const [detailRecipe,   setDetailRecipe]   = useState(null);
   const [usedNt,         setUsedNt]         = useState(null);
+  const [preflight,      setPreflight]      = useState(null);
+  const [showGapModal,   setShowGapModal]   = useState(false);
 
   const [numMeals,      setNumMeals]      = useState(user.num_meals || 3);
   const [foodPref,      setFoodPref]      = useState(user.food_pref || "non-veg");
@@ -213,8 +215,8 @@ export default function Plan({ user, setPage, onLogout }) {
       try {
         const timeout = new Promise((_, rej) =>
           setTimeout(() => rej(new Error("timeout")), 15000));
-        const [s, recs] = await Promise.race([
-          Promise.all([getSettings(), getRecipes()]),
+        const [s, recs, pf] = await Promise.race([
+          Promise.all([getSettings(), getRecipes(), getPreflight()]),
           timeout,
         ]);
         setSettings(s);
@@ -223,6 +225,10 @@ export default function Plan({ user, setPage, onLogout }) {
           setNumMeals(s.user.num_meals || user.num_meals || 3);
           setFoodPref(s.user.food_pref || user.food_pref || "non-veg");
           setTargetCal(s.user.daily_cal ?? user.daily_cal ?? 2000);
+        }
+        if (pf) {
+          setPreflight(pf);
+          if (pf.has_gaps && pf.days_analyzed > 0) setShowGapModal(true);
         }
       } catch (e) {
         if (e?.detail?.toLowerCase?.().includes("invalid") ||
@@ -508,6 +514,46 @@ export default function Plan({ user, setPage, onLogout }) {
 
       {detailRecipe && (
         <RecipeModal name={detailRecipe} onClose={() => setDetailRecipe(null)} />
+      )}
+
+      {showGapModal && preflight && (
+        <div className="modal-backdrop" onClick={() => setShowGapModal(false)}>
+          <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+            <div className="modal-handle" />
+            <div className="modal-title">Adaptive Calorie Target</div>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 14, lineHeight: 1.6 }}>
+              You logged <strong>{preflight.days_analyzed}</strong> out of 7 days this week.
+              {" "}{preflight.gap_dates.length} day{preflight.gap_dates.length !== 1 ? "s" : ""} had no entries ({preflight.gap_dates.map(d => d.slice(5)).join(", ")}).
+            </p>
+            <div className="adaptive-detail-row">
+              <span>Rolling deficit</span>
+              <strong>{preflight.rolling_deficit > 0 ? "+" : ""}{Math.round(preflight.rolling_deficit)} kcal</strong>
+            </div>
+            <div className="adaptive-detail-row">
+              <span>Adjustment (25%)</span>
+              <strong style={{ color: preflight.adjustment >= 0 ? "var(--green-mid)" : "#dc2626" }}>
+                {preflight.adjustment >= 0 ? "+" : ""}{Math.round(preflight.adjustment)} kcal
+              </strong>
+            </div>
+            <div className="adaptive-detail-row" style={{ borderBottom: "none", paddingBottom: 0 }}>
+              <span>Suggested target</span>
+              <strong style={{ color: "var(--green-deep)", fontSize: 16 }}>
+                {preflight.adjusted_cal} kcal
+              </strong>
+            </div>
+            <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 8 }}>
+              <button className="btn btn-primary btn-full" onClick={() => {
+                setTargetCal(preflight.adjusted_cal);
+                setShowGapModal(false);
+              }}>
+                Use adjusted target ({preflight.adjusted_cal} kcal)
+              </button>
+              <button className="btn btn-secondary btn-full" onClick={() => setShowGapModal(false)}>
+                Keep {preflight.base_cal} kcal
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

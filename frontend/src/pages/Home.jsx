@@ -142,6 +142,11 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
     ? Math.round(weekData.reduce((s, d) => s + (d.total_cal || 0), 0) / weekData.length)
     : 0;
 
+  const rollingDeficit = weekData.reduce((s, d) => s + (targetCal - (d.total_cal || 0)), 0);
+  const adaptiveAdj = weekData.length > 0 ? Math.round(rollingDeficit * 0.25) : 0;
+  const adaptiveCal = Math.max(800, targetCal + adaptiveAdj);
+  const showAdaptive = weekData.length > 0 && Math.abs(adaptiveAdj) >= 50;
+
   if (loading) return (
     <div className="page loading-center"><span className="spinner" /></div>
   );
@@ -190,6 +195,20 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
         <MacroBar label="Fat" val={totalFat}
                   target={Math.round(targetCal * 0.20 / 9)}
                   color="var(--fat)" />
+
+        {showAdaptive && (
+          <div className="adaptive-indicator">
+            <span className="adaptive-indicator-label">
+              {adaptiveAdj > 0 ? "▲" : "▼"} Adaptive target
+            </span>
+            <span className="adaptive-indicator-val">
+              {adaptiveCal} kcal
+              <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 4, opacity: 0.8 }}>
+                ({adaptiveAdj > 0 ? "+" : ""}{adaptiveAdj} this week)
+              </span>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Streak + 7-day avg */}

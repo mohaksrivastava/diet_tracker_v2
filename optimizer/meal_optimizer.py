@@ -221,10 +221,13 @@ def _gap_fill(plan, fillers_df, nt, food_pref):
     gap_carb = nt["carb_g"]     - plan["carb_g"]
     gap_fat  = nt["fat_g"]      - plan["fat_g"]
 
-    deficits = {"protein":gap_prot, "carb":gap_carb, "fat":gap_fat}
-    dominant = max(deficits, key=lambda k: deficits[k])
-    if deficits[dominant] < GAP_FILLER_MIN_GAP_G: return plan
-    if gap_cal < -GAP_FILLER_MAX_OVERSHOOT:        return plan
+    if gap_cal < -GAP_FILLER_MAX_OVERSHOOT: return plan
+    if gap_prot > GAP_FILLER_MIN_GAP_G:
+        dominant = "protein"
+    else:
+        deficits = {"carb": gap_carb, "fat": gap_fat}
+        if max(deficits.values()) < GAP_FILLER_MIN_GAP_G: return plan
+        dominant = max(deficits, key=lambda k: deficits[k])
 
     allowed = set(ALLOWED_TYPES.get(food_pref, ALLOWED_TYPES["non-veg"]))
     pool    = fillers_df[fillers_df["food_type"].isin(allowed)]

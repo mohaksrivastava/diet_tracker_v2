@@ -97,7 +97,15 @@ CREATE TABLE IF NOT EXISTS nudges (
 
 CREATE INDEX IF NOT EXISTS idx_nudges_user ON nudges (user_id, seen);
 
--- ── 6. Verify ─────────────────────────────────────────────────
+-- ── 6. Migration: protein_hard_hi ────────────────────────────
+ALTER TABLE nutrition_targets
+  ADD COLUMN IF NOT EXISTS protein_hard_hi REAL DEFAULT 0.10;
+
+UPDATE nutrition_targets
+  SET protein_hard_lo = 0.10
+  WHERE protein_hard_lo = 0.20;
+
+-- ── 7. Verify ─────────────────────────────────────────────────
 SELECT table_name FROM information_schema.tables
 WHERE table_schema = 'public'
 ORDER BY table_name;

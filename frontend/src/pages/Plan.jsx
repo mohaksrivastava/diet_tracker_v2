@@ -9,6 +9,12 @@ const FOOD_PREFS = [
   { val: "non-veg", label: "Non-veg" },
 ];
 
+function parseList(val) {
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string" && val.trim()) return val.split("|").map(s => s.trim()).filter(Boolean);
+  return [];
+}
+
 function RecipeModal({ name, onClose }) {
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,6 +26,9 @@ function RecipeModal({ name, onClose }) {
       .catch(() => setDetail(null))
       .finally(() => setLoading(false));
   }, [name]);
+
+  const ingredients = parseList(detail?.ingredients);
+  const steps       = parseList(detail?.steps);
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -39,27 +48,27 @@ function RecipeModal({ name, onClose }) {
                 {detail.serving_note}
               </p>
             )}
-            {detail.ingredients?.length > 0 && (
+            {ingredients.length > 0 && (
               <>
                 <div className="card-title" style={{ marginTop: 8 }}>Ingredients</div>
                 <ul style={{ paddingLeft: 18, marginBottom: 14 }}>
-                  {detail.ingredients.map((ing, i) => (
+                  {ingredients.map((ing, i) => (
                     <li key={i} style={{ fontSize: 14, marginBottom: 4 }}>{ing}</li>
                   ))}
                 </ul>
               </>
             )}
-            {detail.steps?.length > 0 && (
+            {steps.length > 0 && (
               <>
                 <div className="card-title">Instructions</div>
                 <ol style={{ paddingLeft: 18 }}>
-                  {detail.steps.map((step, i) => (
+                  {steps.map((step, i) => (
                     <li key={i} style={{ fontSize: 14, marginBottom: 8, lineHeight: 1.5 }}>{step}</li>
                   ))}
                 </ol>
               </>
             )}
-            {!detail.ingredients?.length && !detail.steps?.length && (
+            {!ingredients.length && !steps.length && (
               <p style={{ color: "var(--text-muted)", fontSize: 14 }}>Recipe details coming soon.</p>
             )}
           </>
@@ -215,8 +224,8 @@ export default function Plan({ user, setPage, onLogout }) {
       try {
         const timeout = new Promise((_, rej) =>
           setTimeout(() => rej(new Error("timeout")), 15000));
-        const [s, recs, pf] = await Promise.race([
-          Promise.all([getSettings(), getRecipes(), getPreflight()]),
+        const [s, recs] = await Promise.race([
+          Promise.all([getSettings(), getRecipes()]),
           timeout,
         ]);
         setSettings(s);
@@ -225,10 +234,6 @@ export default function Plan({ user, setPage, onLogout }) {
           setNumMeals(s.user.num_meals || user.num_meals || 3);
           setFoodPref(s.user.food_pref || user.food_pref || "non-veg");
           setTargetCal(s.user.daily_cal ?? user.daily_cal ?? 2000);
-        }
-        if (pf) {
-          setPreflight(pf);
-          if (pf.has_gaps && pf.days_analyzed > 0) setShowGapModal(true);
         }
       } catch (e) {
         if (e?.detail?.toLowerCase?.().includes("invalid") ||
@@ -240,6 +245,14 @@ export default function Plan({ user, setPage, onLogout }) {
       } finally {
         setInitLoading(false);
       }
+      getPreflight()
+        .then(pf => {
+          if (pf) {
+            setPreflight(pf);
+            if (pf.has_gaps && pf.days_analyzed > 0) setShowGapModal(true);
+          }
+        })
+        .catch(() => {});
     }
     load();
   }, []);

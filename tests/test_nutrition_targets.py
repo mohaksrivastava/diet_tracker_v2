@@ -6,10 +6,12 @@ the optimizer and the settings page. A bug here cascades to every plan.
 """
 
 import pytest
+import pandas as pd
 from db.nutrition_targets import (
     get_default_target,
     get_macro_split,
     recompute_grams_from_cal,
+    blend_macro_targets,
 )
 
 
@@ -39,8 +41,8 @@ class TestGetDefaultTarget:
         required = {
             "cal_target", "protein_g", "fat_g", "carb_g", "fiber_g",
             "cal_soft_pct", "protein_soft_lo", "fat_soft_hi", "carb_soft_pct",
-            "cal_hard_pct", "protein_hard_lo", "fat_hard_hi", "fat_hard_lo",
-            "carb_hard_pct",
+            "cal_hard_pct", "protein_hard_lo", "protein_hard_hi",
+            "fat_hard_hi", "fat_hard_lo", "carb_hard_pct",
             "k_cal", "k_protein_under", "k_fat_over", "k_carb",
         }
         t = get_default_target(1800)
@@ -139,3 +141,77 @@ class TestRecomputeGramsFromCal:
         assert nt_high["protein_g"] > nt_low["protein_g"]
         assert nt_high["carb_g"]    > nt_low["carb_g"]
         assert nt_high["fat_g"]     > nt_low["fat_g"]
+
+
+class TestBlendMacroTargets:
+    """blend_macro_targets() adjusts fat/carb based on historical intake."""
+
+    def _make_history(self, days):
+        """Build a history DataFrame from a list of (fat, carb) daily totals."""
+        return pd.DataFrame([
+            {"log_date": f"2026-05-{20+i:02d}", "total_cal": 1800,
+             "total_prot": 135, "total_carb": carb, "total_fat": fat,
+             "n_entries": 3}
+            for i, (fat, carb) in enumerate(days)
+        ])
+
+    def test_empty_history_returns_unblended(self):
+        nt = get_default_target(1800)
+        blended = blend_macro_targets(nt, pd.DataFrame(), 0)
+        assert blended["fat_g"] == nt["fat_g"]
+        assert blended["carb_g"] == nt["carb_g"]
+
+    def test_none_history_returns_unblended(self):
+        nt = get_default_target(1800)
+        blended = blend_macro_targets(nt, None, 0)
+        assert blended["fat_g"] == nt["fat_g"]
+        assert blended["carb_g"] == nt["carb_g"]
+
+    def test_on_target_history_stays_same(self):
+        nt = get_default_target(1800)
+        # 3 days of eating exactly on target
+        hist = self._make_history([(nt["fat_g"], nt["carb_g"])] * 3)
+        blended = blend_macro_targets(nt, hist, 3)
+        assert blended["fat_g"] == pytest.approx(nt["fat_g"], abs=0.2)
+        assert blended["carb_g"] == pytest.approx(nt["carb_g"], abs=0.2)
+
+    def test_overeating_fat_reduces_today(self):
+        nt = get_default_target(1800)
+        # 3 days of eating 50% more fat than target
+        hist = self._make_history([(nt["fat_g"] * 1.5, nt["carb_g"])] * 3)
+        blended = blend_macro_targets(nt, hist, 3)
+        assert blended["fat_g"] < nt["fat_g"]
+
+    def test_undereating_carbs_increases_today(self):
+        nt = get_default_target(1800)
+        # 3 days of eating 70% of carb target
+        hist = self._make_history([(nt["fat_g"], nt["carb_g"] * 0.7)] * 3)
+        blended = blend_macro_targets(nt, hist, 3)
+        assert blended["carb_g"] > nt["carb_g"]
+
+    def test_protein_never_blended(self):
+        nt = get_default_target(1800)
+        hist = self._make_history([(nt["fat_g"] * 2, nt["carb_g"] * 0.5)] * 5)
+        blended = blend_macro_targets(nt, hist, 5)
+        assert blended["protein_g"] == nt["protein_g"]
+
+    def test_clamp_prevents_extreme_low(self):
+        nt = get_default_target(1800)
+        # 7 days of massive fat overeating — should clamp at 50%
+        hist = self._make_history([(nt["fat_g"] * 3, nt["carb_g"])] * 7)
+        blended = blend_macro_targets(nt, hist, 7)
+        assert blended["fat_g"] == pytest.approx(nt["fat_g"] * 0.5, abs=0.2)
+
+    def test_clamp_prevents_extreme_high(self):
+        nt = get_default_target(1800)
+        # 7 days of eating zero carbs — should clamp at 150%
+        hist = self._make_history([(nt["fat_g"], 0)] * 7)
+        blended = blend_macro_targets(nt, hist, 7)
+        assert blended["carb_g"] == pytest.approx(nt["carb_g"] * 1.5, abs=0.2)
+
+    def test_returns_copy_not_mutate(self):
+        nt = get_default_target(1800)
+        original_fat = nt["fat_g"]
+        hist = self._make_history([(nt["fat_g"] * 1.5, nt["carb_g"])] * 3)
+        blend_macro_targets(nt, hist, 3)
+        assert nt["fat_g"] == original_fat

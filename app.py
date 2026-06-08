@@ -15,10 +15,11 @@ from db.recipes           import (get_all_recipes, get_recipe_detail,
                                   log_optimizer_run)
 from db.logs              import (log_meal, get_today_logs, get_logs_for_date,
                                   get_week_summary, compute_streak,
-                                  update_log_entry, delete_log_entry)
+                                  update_log_entry, delete_log_entry,
+                                  get_last_n_days_logs)
 from db.nudges            import get_all_nudges, get_latest_nudge, mark_nudge_seen
 from db.nutrition_targets import (load_or_default_target, save_nutrition_target,
-                                  get_default_target)
+                                  get_default_target, blend_macro_targets)
 from optimizer.meal_optimizer import run_optimizer, ALLOWED_TYPES
 
 # ── Page config ────────────────────────────────────────────────────────────────
@@ -624,6 +625,14 @@ def plan_page():
         nt["protein_g"]  = round(target_cal * prot_pct / 4, 1)
         nt["fat_g"]      = round(target_cal * fat_pct  / 9, 1)
         nt["carb_g"]     = round(target_cal * carb_pct / 4, 1)
+
+        # Blend fat/carb targets with historical intake (up to 7 days)
+        try:
+            hist_df = get_last_n_days_logs(conn(), uid, n=7)
+            if not hist_df.empty:
+                nt = blend_macro_targets(nt, hist_df, len(hist_df))
+        except Exception:
+            pass  # Fall back to unblended targets on DB failure
 
         st.session_state.nutrition_target = nt
 

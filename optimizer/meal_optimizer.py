@@ -248,6 +248,11 @@ def _gap_fill(plan, fillers_df, nt, food_pref):
             mv = {"protein":fp, "carb":fc2, "fat":ff}
             if mv[dominant] <= 0: continue
             score = mv[dominant]/max(fc,1)
+            # Protein-density bonus: prefer high-protein fillers when closing protein gap
+            if dominant == "protein":
+                prot_per_100kcal = float(r["protein"]) * 100 / max(float(r["calories"]), 1)
+                if prot_per_100kcal > 6.0:
+                    score *= 2.0
             if score > best_score:
                 best_score = score
                 best = (r, port, round(fc), round(fp,1), round(fc2,1), round(ff,1))
@@ -330,6 +335,7 @@ def _hard_feasible(cal,pg,fg,cg,t):
     return ((cal>=t["cal_target"]*(1-t["cal_hard_pct"])) &
             (cal<=t["cal_target"]*(1+t["cal_hard_pct"])) &
             (pg>=t["protein_g"]*(1-t["protein_hard_lo"])) &
+            (pg<=t["protein_g"]*(1+t.get("protein_hard_hi",0.10))) &
             (fg>=t["fat_g"]*(1-t["fat_hard_lo"])) &
             (fg<=t["fat_g"]*(1+t["fat_hard_hi"])) &
             (cg>=t["carb_g"]*(1-t["carb_hard_pct"])) &
@@ -337,8 +343,8 @@ def _hard_feasible(cal,pg,fg,cg,t):
 
 def _scale_hard(t, mult):
     out=dict(t)
-    for k in ["cal_hard_pct","protein_hard_lo","fat_hard_hi",
-              "fat_hard_lo","carb_hard_pct","fiber_hard_lo"]:
+    for k in ["cal_hard_pct","protein_hard_lo","protein_hard_hi",
+              "fat_hard_hi","fat_hard_lo","carb_hard_pct","fiber_hard_lo"]:
         out[k]=t.get(k,0.25)*mult
     return out
 

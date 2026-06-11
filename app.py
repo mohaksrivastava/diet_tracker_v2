@@ -218,7 +218,7 @@ SLOT_LABELS = {"lunch":"Lunch", "dinner":"Dinner",
                "breakfast":"Breakfast", "snack":"Snack"}
 FOOD_PREFS  = {"vegan":"🌱 Vegan", "veg":"🧀 Vegetarian",
                "egg":"🥚 Egg allowed", "non-veg":"🍗 Non-vegetarian"}
-PORTIONS    = {"0.5×":0.5, "1×":1.0, "1.5×":1.5, "2×":2.0}
+PORTIONS    = {"0.25×":0.25, "0.5×":0.5, "0.75×":0.75, "1×":1.0, "1.25×":1.25, "1.5×":1.5, "1.75×":1.75, "2×":2.0, "2.25×":2.25, "2.5×":2.5}
 
 RELAX_MESSAGES = {
     "strict":    None,

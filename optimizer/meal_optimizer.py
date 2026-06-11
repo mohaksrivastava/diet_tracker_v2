@@ -12,6 +12,13 @@ import time
 import numpy as np
 import pandas as pd
 from itertools import combinations, product as iproduct
+from scipy.optimize import lsq_linear
+
+
+# ── Optimizer Constants ────────────────────────────────────────────────────────
+TOP_REFINE        = 20
+PORTION_SNAP      = 0.25
+SLOT_CAL_ROW_W    = 0.3
 
 # ── Nutrition matrix ───────────────────────────────────────────────────────────
 CAL_LEVELS = [1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900,
@@ -101,7 +108,7 @@ RELAXATION_LEVELS = [
 
 # ── Public API ─────────────────────────────────────────────────────────────────
 def run_optimizer(recipes_df: pd.DataFrame, K: int,
-                  nutrition_target: dict, food_pref: str="non-veg") -> dict:
+                  nutrition_target: dict, food_pref: str="non-veg", refine: bool=True) -> dict:
     t0 = time.monotonic()
     K  = int(K)
     if K not in range(2,6): raise ValueError("K must be 2-5.")
@@ -178,8 +185,93 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
     feas_pos = np.where(feas)[0]
     rl = np.argsort(scores); rg = feas_pos[rl]
 
+    # Re-determine multiplier for current relax level
+    current_mult = None
+    for name, mult in RELAXATION_LEVELS:
+        if name == relax_level:
+            current_mult = mult
+            break
+
+    # Phase 2.5
+    top_cands = []
+    refined_count = 0
+    if refine and len(rl) > 0:
+        top_N = min(TOP_REFINE, len(rl))
+
+        slot_targets_list = [slot_targets[st] for st in slot_seq]
+
+        for i in range(top_N):
+            li = rl[i]
+            gi = rg[i]
+
+            orig_score = float(scores[li])
+            orig_combo = tuple(flat[si][gi] for si in range(K))
+
+            # Deep copy chosen candidates since we might modify portions
+            chosen = []
+            for si in range(K):
+                c = slot_cands[si][orig_combo[si]]
+                chosen.append({
+                    "indices": list(c["indices"]),
+                    "portions": list(c["portions"]),
+                    "food_groups": list(c["food_groups"]),
+                    "extra_pen": c["extra_pen"],
+                    "cuisine_pen": c["cuisine_pen"],
+                    "anchor_bonus": c["anchor_bonus"]
+                })
+
+            # Build inputs for refinement
+            recipes_rows = []
+            slot_index_of = []
+
+            for si in range(K):
+                for idx in chosen[si]["indices"]:
+                    recipes_rows.append(df.iloc[idx].to_dict())
+                    slot_index_of.append(si)
+
+            new_ports, new_score, new_totals = _refine_portions(recipes_rows, slot_index_of, slot_targets_list, nutrition_target)
+
+            if len(new_ports) > 0:
+                # Add existing unaffected penalties to new score
+                base_penalties = sum(c["extra_pen"] + c["cuisine_pen"] + c["anchor_bonus"] for c in chosen)
+                final_new_score = new_score + base_penalties
+
+                # Check feasibility
+                feas_refined = True
+                if current_mult is not None:
+                    t_adj = _scale_hard(nutrition_target, current_mult)
+                    # We need arrays for _hard_feasible
+                    feas_arr = _hard_feasible(np.array([new_totals["tc"]]),
+                                            np.array([new_totals["pg"]]),
+                                            np.array([new_totals["fg"]]),
+                                            np.array([new_totals["cg"]]),
+                                            t_adj)
+                    feas_refined = bool(feas_arr[0])
+
+                if feas_refined and final_new_score < orig_score:
+                    # Accept refinement
+                    p_idx = 0
+                    for si in range(K):
+                        n_in_slot = len(chosen[si]["indices"])
+                        chosen[si]["portions"] = new_ports[p_idx : p_idx + n_in_slot]
+                        p_idx += n_in_slot
+                    top_cands.append((final_new_score, orig_combo, chosen))
+                    refined_count += 1
+                    continue
+
+            # Fallback to original
+            top_cands.append((orig_score, orig_combo, chosen))
+    else:
+        for li, gi in zip(rl, rg):
+            combo = tuple(flat[si][gi] for si in range(K))
+            chosen = [slot_cands[si][combo[si]] for si in range(K)]
+            top_cands.append((float(scores[li]), combo, chosen))
+
+    # Re-rank after refinement
+    top_cands.sort(key=lambda x: x[0])
+
     selected = []
-    for li, gi in zip(rl, rg):
+    for score, combo, chosen in top_cands:
         if len(selected)>=3: break
         combo  = tuple(flat[si][gi] for si in range(K))
         chosen = [slot_cands[si][combo[si]] for si in range(K)]
@@ -191,12 +283,44 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
         selected.append((float(scores[li]), combo, chosen))
 
     if len(selected)<3:
-        for li, gi in zip(rl, rg):
+        for score, combo, chosen in top_cands:
             if len(selected)>=3: break
-            combo = tuple(flat[si][gi] for si in range(K))
             if any(combo==p for _,p,_ in selected): continue
-            chosen=[slot_cands[si][combo[si]] for si in range(K)]
-            selected.append((float(scores[li]),combo,chosen))
+            selected.append((score, combo, chosen))
+
+    # Re-compute relaxation level
+    final_relax_level = "soft_only"
+    if selected:
+        for name, mult in RELAXATION_LEVELS:
+            if mult is None:
+                final_relax_level = name
+                break
+
+            t_adj = _scale_hard(nutrition_target, mult)
+            all_pass = True
+            for _, _, chosen in selected:
+                # Calculate totals for this chosen candidate
+                # Need to use the actual portions and recipes
+                # To be exact, re-calculate
+                tc = 0.0; pg = 0.0; cg = 0.0; fg = 0.0
+                for cand in chosen:
+                    for idx, port in zip(cand["indices"], cand["portions"]):
+                        r = df.iloc[idx]
+                        tc += r["calories"] * port
+                        pg += r["protein"] * port
+                        cg += r["carbohydrate"] * port
+                        fg += r["fat"] * port
+
+                feas_arr = _hard_feasible(np.array([tc]), np.array([pg]), np.array([fg]), np.array([cg]), t_adj)
+                if not feas_arr[0]:
+                    all_pass = False
+                    break
+
+            if all_pass:
+                final_relax_level = name
+                break
+
+        relax_level = final_relax_level
 
     plans = _format(selected, slot_seq, df, nutrition_target)
 
@@ -211,6 +335,7 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
         "runtime_ms": round((time.monotonic()-t0)*1000),
         "num_candidates": N,
         "num_feasible": int(feas.sum()),
+        "refined": refined_count,
     }
 
 
@@ -445,6 +570,106 @@ def _gen_slot_cands(df, s_type, s_target, nt):
 
     all_c.sort(key=lambda c:c["score"])
     return all_c[:M_CANDS]
+
+
+
+# ── Phase 2.5 ──────────────────────────────────────────────────────────────────
+def _refine_portions(recipes_rows, slot_index_of, slot_targets_list, nt):
+    """
+    Continuous portion re-optimization using bounded weighted linear least-squares.
+    Returns: (snapped_portions, new_score, new_totals)
+    """
+    n_recipes = len(recipes_rows)
+    if n_recipes == 0:
+        return [], 0.0, {}
+
+    # Extract recipe data
+    cals = np.array([float(r["calories"]) for r in recipes_rows])
+    prots = np.array([float(r["protein"]) for r in recipes_rows])
+    carbs = np.array([float(r["carbohydrate"]) for r in recipes_rows])
+    fats = np.array([float(r["fat"]) for r in recipes_rows])
+
+    p_mins = np.array([float(r.get("portion_min", 0.5)) for r in recipes_rows])
+    p_typs = np.array([float(r.get("portion_typical", 1.0)) for r in recipes_rows])
+    p_maxs = np.array([float(r.get("portion_max", 2.5)) for r in recipes_rows])
+
+    # Daily macro rows
+    A_daily = np.vstack([cals, prots, carbs, fats])
+    b_daily = np.array([
+        nt["cal_target"],
+        nt["protein_g"],
+        nt["carb_g"],
+        nt["fat_g"]
+    ])
+
+    # Slot rows
+    n_slots = len(slot_targets_list)
+    A_slot = np.zeros((n_slots, n_recipes))
+    b_slot = np.zeros(n_slots)
+    for i in range(n_recipes):
+        s_idx = slot_index_of[i]
+        A_slot[s_idx, i] = cals[i]
+    for s_idx in range(n_slots):
+        b_slot[s_idx] = slot_targets_list[s_idx]
+
+    # Combine matrices
+    A = np.vstack([A_daily, A_slot])
+    b = np.concatenate([b_daily, b_slot])
+
+    # Weights
+    w_cal = np.sqrt(nt.get("k_cal", 1000)) / max(nt["cal_target"], 1)
+    w_prot = np.sqrt(nt.get("k_protein_under", 2500)) / max(nt["protein_g"], 1)
+    w_carb = np.sqrt(nt.get("k_carb", 400)) / max(nt["carb_g"], 1)
+    w_fat = np.sqrt(nt.get("k_fat_over", 1500)) / max(nt["fat_g"], 1)
+
+    weights = np.array([w_cal, w_prot, w_carb, w_fat])
+    slot_weights = np.full(n_slots, w_cal * SLOT_CAL_ROW_W)
+    all_weights = np.concatenate([weights, slot_weights])
+
+    # Apply weights
+    A_w = A * all_weights[:, None]
+    b_w = b * all_weights
+
+    # Bounds
+    lb = np.maximum(p_mins, 0.25)
+    ub = p_maxs
+
+    # Solve
+    try:
+        res = lsq_linear(A_w, b_w, bounds=(lb, ub))
+        portions = res.x
+    except Exception:
+        portions = np.maximum(np.minimum(p_typs, ub), lb)
+
+    # Snap and clamp
+    snapped_portions = np.round(portions / PORTION_SNAP) * PORTION_SNAP
+    snapped_portions = np.clip(snapped_portions, lb, ub)
+
+    # Recompute totals and score
+    tc = float(np.sum(cals * snapped_portions))
+    pg = float(np.sum(prots * snapped_portions))
+    cg = float(np.sum(carbs * snapped_portions))
+    fg = float(np.sum(fats * snapped_portions))
+
+    # Recompute portion penalty
+    pp = _portion_pen(snapped_portions, p_typs)
+
+    # We need to compute macro pen, which expects arrays
+    mp_arr = _macro_pen(np.array([tc]), np.array([pg]), np.array([fg]), np.array([cg]), nt)
+    mp = float(mp_arr[0])
+
+    new_score = mp + float(pp)
+
+    new_totals = {
+        "tc": tc,
+        "pg": pg,
+        "cg": cg,
+        "fg": fg,
+        "pp": pp,
+        "portions": snapped_portions.tolist()
+    }
+
+    return snapped_portions.tolist(), new_score, new_totals
 
 
 # ── Output ─────────────────────────────────────────────────────────────────────

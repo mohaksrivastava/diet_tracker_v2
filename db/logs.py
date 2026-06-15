@@ -6,19 +6,20 @@ from db.connection import execute
 
 def log_meal(conn, user_id: int, log_date: date, recipe_name: str,
              meal_type: str, calories: int, protein_g: float,
-             carb_g: float, fat_g: float):
+             carb_g: float, fat_g: float, fiber_g: float | None = None):
     execute(conn,
         """INSERT INTO meal_logs
              (user_id, log_date, recipe_name, meal_type, calories,
-              protein_g, carb_g, fat_g)
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+              protein_g, carb_g, fat_g, fiber_g)
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
         (user_id, str(log_date), recipe_name, meal_type,
-         int(calories), float(protein_g), float(carb_g), float(fat_g)))
+         int(calories), float(protein_g), float(carb_g), float(fat_g),
+         float(fiber_g) if fiber_g is not None else None))
 
 
 def get_today_logs(conn, user_id: int) -> pd.DataFrame:
     rows = execute(conn,
-        """SELECT recipe_name, meal_type, calories, protein_g, carb_g, fat_g, logged_at
+        """SELECT recipe_name, meal_type, calories, protein_g, carb_g, fat_g, fiber_g, logged_at
            FROM meal_logs
            WHERE user_id = %s AND log_date = %s
            ORDER BY logged_at""",
@@ -29,7 +30,7 @@ def get_today_logs(conn, user_id: int) -> pd.DataFrame:
 def get_logs_for_date(conn, user_id: int, log_date: date) -> pd.DataFrame:
     rows = execute(conn,
         """SELECT id, recipe_name, meal_type, calories,
-                  protein_g, carb_g, fat_g, logged_at
+                  protein_g, carb_g, fat_g, fiber_g, logged_at
            FROM meal_logs
            WHERE user_id = %s AND log_date = %s
            ORDER BY logged_at""",
@@ -67,7 +68,8 @@ def get_week_summary(conn, user_id: int) -> pd.DataFrame:
                   SUM(calories)  AS total_cal,
                   SUM(protein_g) AS total_prot,
                   SUM(carb_g)    AS total_carb,
-                  SUM(fat_g)     AS total_fat
+                  SUM(fat_g)     AS total_fat,
+                  SUM(fiber_g)   AS total_fiber
            FROM meal_logs
            WHERE user_id = %s AND log_date BETWEEN %s AND %s
            GROUP BY log_date ORDER BY log_date""",
@@ -87,6 +89,7 @@ def get_last_n_days_logs(conn, user_id: int, n: int = 5) -> pd.DataFrame:
                   SUM(protein_g) AS total_prot,
                   SUM(carb_g)    AS total_carb,
                   SUM(fat_g)     AS total_fat,
+                  SUM(fiber_g)   AS total_fiber,
                   COUNT(*)       AS n_entries
            FROM meal_logs
            WHERE user_id = %s AND log_date BETWEEN %s AND %s
@@ -100,12 +103,14 @@ def get_last_n_days_logs(conn, user_id: int, n: int = 5) -> pd.DataFrame:
 
 
 def update_log_entry(conn, log_id: int, meal_type: str, calories: int,
-                     protein_g: float, carb_g: float, fat_g: float):
+                     protein_g: float, carb_g: float, fat_g: float,
+                     fiber_g: float | None = None):
     execute(conn,
         """UPDATE meal_logs
-           SET meal_type=%s, calories=%s, protein_g=%s, carb_g=%s, fat_g=%s
+           SET meal_type=%s, calories=%s, protein_g=%s, carb_g=%s, fat_g=%s, fiber_g=%s
            WHERE id=%s""",
-        (meal_type, int(calories), float(protein_g), float(carb_g), float(fat_g), log_id))
+        (meal_type, int(calories), float(protein_g), float(carb_g), float(fat_g),
+         float(fiber_g) if fiber_g is not None else None, log_id))
 
 
 def delete_log_entry(conn, log_id: int):

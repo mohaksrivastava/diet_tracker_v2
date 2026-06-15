@@ -32,10 +32,11 @@ export default function Log({ user, setPage }) {
   }, [today]);
 
   const recipe = recipes.find(r => r.name === selected);
-  const cal    = recipe ? Math.round(recipe.calories   * portion) : 0;
-  const prot   = recipe ? Math.round(recipe.protein    * portion * 10) / 10 : 0;
-  const carb   = recipe ? Math.round(recipe.carbohydrate * portion * 10) / 10 : 0;
-  const fat    = recipe ? Math.round(recipe.fat        * portion * 10) / 10 : 0;
+  const cal    = recipe ? Math.round(recipe.calories      * portion) : 0;
+  const prot   = recipe ? Math.round(recipe.protein       * portion * 10) / 10 : 0;
+  const carb   = recipe ? Math.round(recipe.carbohydrate  * portion * 10) / 10 : 0;
+  const fat    = recipe ? Math.round(recipe.fat           * portion * 10) / 10 : 0;
+  const fiber  = recipe?.fiber != null ? Math.round(recipe.fiber * portion * 10) / 10 : null;
 
   async function handleLog() {
     if (!recipe) { setError("Select a recipe first."); return; }
@@ -45,6 +46,7 @@ export default function Log({ user, setPage }) {
         log_date: logDate, recipe_name: recipe.name,
         meal_type: mealType, calories: cal,
         protein_g: prot, carb_g: carb, fat_g: fat,
+        fiber_g: fiber,
       });
       setSuccess(`Logged ${recipe.name} (${cal} kcal)`);
       const updated = await getLogs(today);
@@ -122,10 +124,11 @@ export default function Log({ user, setPage }) {
         {recipe && (
           <div style={{ background: "var(--linen)", borderRadius: 10,
                         padding: "10px 14px", marginBottom: 14,
-                        display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
+                        display: "grid", gridTemplateColumns: "repeat(5, 1fr)",
                         gap: 8, textAlign: "center" }}>
             {[["Cal", cal, "kcal"], ["Protein", prot, "g"],
-              ["Carbs", carb, "g"], ["Fat", fat, "g"]].map(([l, v, u]) => (
+              ["Carbs", carb, "g"], ["Fat", fat, "g"],
+              ["Fiber", fiber != null ? fiber : "—", "g"]].map(([l, v, u]) => (
               <div key={l}>
                 <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase",
                               color: "var(--text-muted)", letterSpacing: "0.06em" }}>{l}</div>

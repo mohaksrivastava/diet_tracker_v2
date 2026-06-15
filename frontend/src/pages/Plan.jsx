@@ -380,6 +380,7 @@ export default function Plan({ user, setPage, onLogout }) {
           protein_g:   Math.round((r.protein || 0) * (r.portion || 1) * 10) / 10,
           carb_g:      Math.round((r.carbohydrate || 0) * (r.portion || 1) * 10) / 10,
           fat_g:       Math.round((r.fat || 0) * (r.portion || 1) * 10) / 10,
+          fiber_g:     r.fiber != null ? Math.round((r.fiber || 0) * (r.portion || 1) * 10) / 10 : null,
         });
       }
     }

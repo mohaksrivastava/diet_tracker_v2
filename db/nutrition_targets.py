@@ -106,6 +106,11 @@ def load_or_default_target(conn, user_id: int, daily_cal: int) -> dict:
     # Backfill protein_hard_hi for legacy rows that lack it
     if "protein_hard_hi" not in target or target.get("protein_hard_hi") is None:
         target["protein_hard_hi"] = 0.10
+    # Backfill fiber keys for legacy rows that pre-date the fiber migration
+    target.setdefault("fiber_g",       30.0)
+    target.setdefault("fiber_soft_lo",  0.10)
+    target.setdefault("fiber_hard_lo",  0.30)
+    target.setdefault("k_fiber_under", 800.0)
     return target
 
 

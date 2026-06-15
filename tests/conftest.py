@@ -14,7 +14,8 @@ from db.nutrition_targets import get_default_target
 
 def _r(name, meal_type, food_type, food_group, calories, protein, carb, fat,
        role="side", cuisine="north_indian",
-       portion_min=0.5, portion_typical=1.0, portion_max=2.5):
+       portion_min=0.5, portion_typical=1.0, portion_max=2.5,
+       fiber=3.0):
     return {
         "name":             name,
         "category":         "recipe",
@@ -25,6 +26,7 @@ def _r(name, meal_type, food_type, food_group, calories, protein, carb, fat,
         "protein":          float(protein),
         "carbohydrate":     float(carb),
         "fat":              float(fat),
+        "fiber":            float(fiber) if fiber is not None else None,
         "role":             role,
         "cuisine":          cuisine,
         "portion_min":      portion_min,
@@ -141,6 +143,22 @@ def no_gap_filler_df():
 def no_role_column_df():
     """DataFrame without a 'role' column — optimizer should fill in 'side' default."""
     df = pd.DataFrame(FIXTURE_RECIPES).drop(columns=["role"])
+    return df
+
+
+@pytest.fixture(scope="module")
+def no_fiber_df():
+    """All fiber values set to NULL — coverage gate should keep fiber_active=False."""
+    df = pd.DataFrame(FIXTURE_RECIPES).copy()
+    df["fiber"] = None
+    return df
+
+
+@pytest.fixture(scope="module")
+def sparse_fiber_df():
+    """Only 50% of recipes have fiber — coverage gate should keep fiber_active=False."""
+    df = pd.DataFrame(FIXTURE_RECIPES).copy()
+    df.loc[df.index[len(df) // 2:], "fiber"] = None
     return df
 
 

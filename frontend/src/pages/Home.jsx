@@ -132,10 +132,12 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
     load();
   }, [today]);
 
-  const totalCal  = logs.reduce((s, r) => s + (r.calories  || 0), 0);
-  const totalProt = logs.reduce((s, r) => s + (r.protein_g || 0), 0);
-  const totalCarb = logs.reduce((s, r) => s + (r.carb_g    || 0), 0);
-  const totalFat  = logs.reduce((s, r) => s + (r.fat_g     || 0), 0);
+  const totalCal   = logs.reduce((s, r) => s + (r.calories  || 0), 0);
+  const totalProt  = logs.reduce((s, r) => s + (r.protein_g || 0), 0);
+  const totalCarb  = logs.reduce((s, r) => s + (r.carb_g    || 0), 0);
+  const totalFat   = logs.reduce((s, r) => s + (r.fat_g     || 0), 0);
+  const totalFiber = logs.reduce((s, r) => s + (r.fiber_g   || 0), 0);
+  const hasFiberData = logs.some(r => r.fiber_g != null);
   const targetCal = user.daily_cal || 1800;
 
   const avgCal = weekData.length
@@ -195,6 +197,14 @@ export default function Home({ user, setPage, onNudgeCount, onLogout }) {
         <MacroBar label="Fat" val={totalFat}
                   target={Math.round(targetCal * 0.20 / 9)}
                   color="var(--fat)" />
+        {hasFiberData && (
+          <>
+            <div style={{ marginTop: 6 }} />
+            <MacroBar label="Fiber" val={Math.round(totalFiber * 10) / 10}
+                      target={30}
+                      color="var(--green-light)" />
+          </>
+        )}
 
         {showAdaptive && (
           <div className="adaptive-indicator">

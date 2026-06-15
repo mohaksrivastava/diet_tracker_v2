@@ -17,12 +17,15 @@ function EditModal({ entry, recipes, onSave, onClose }) {
     recipe ? Math.round((entry.calories / recipe.calories) * 10) / 10 : 1.0
   );
 
+  const [fiberG, setFiberG] = useState(entry.fiber_g ?? null);
+
   useEffect(() => {
     if (recipe) {
       setCalories(Math.round(recipe.calories    * portion));
       setProtein (Math.round(recipe.protein     * portion * 10) / 10);
       setCarb    (Math.round(recipe.carbohydrate* portion * 10) / 10);
       setFat     (Math.round(recipe.fat         * portion * 10) / 10);
+      setFiberG  (recipe.fiber != null ? Math.round(recipe.fiber * portion * 10) / 10 : null);
     }
   }, [portion, recipe]);
 
@@ -35,6 +38,7 @@ function EditModal({ entry, recipes, onSave, onClose }) {
         protein_g: Number(protein),
         carb_g: Number(carb),
         fat_g: Number(fat),
+        fiber_g: fiberG != null ? Number(fiberG) : null,
       });
       onSave();
     } catch(e) { alert(e?.detail || "Save failed"); setSaving(false); }
@@ -78,6 +82,7 @@ function EditModal({ entry, recipes, onSave, onClose }) {
             </div>
             <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>
               {calories} kcal · P:{protein}g · C:{carb}g · F:{fat}g
+              {fiberG != null ? ` · Fib:${fiberG}g` : ""}
             </div>
           </div>
         ) : (
@@ -115,10 +120,11 @@ function AddModal({ logDate, recipes, onSave, onClose }) {
   const [saving,   setSaving]   = useState(false);
 
   const recipe = recipes.find(r => r.name === selected);
-  const cal  = recipe ? Math.round(recipe.calories      * portion) : 0;
-  const prot = recipe ? Math.round(recipe.protein       * portion * 10) / 10 : 0;
-  const carb = recipe ? Math.round(recipe.carbohydrate  * portion * 10) / 10 : 0;
-  const fat  = recipe ? Math.round(recipe.fat           * portion * 10) / 10 : 0;
+  const cal   = recipe ? Math.round(recipe.calories      * portion) : 0;
+  const prot  = recipe ? Math.round(recipe.protein       * portion * 10) / 10 : 0;
+  const carb  = recipe ? Math.round(recipe.carbohydrate  * portion * 10) / 10 : 0;
+  const fat   = recipe ? Math.round(recipe.fat           * portion * 10) / 10 : 0;
+  const fiber = recipe?.fiber != null ? Math.round(recipe.fiber * portion * 10) / 10 : null;
 
   async function save() {
     if (!recipe) { alert("Select a recipe."); return; }
@@ -128,6 +134,7 @@ function AddModal({ logDate, recipes, onSave, onClose }) {
         log_date: logDate, recipe_name: recipe.name,
         meal_type: mealType, calories: cal,
         protein_g: prot, carb_g: carb, fat_g: fat,
+        fiber_g: fiber,
       });
       onSave();
     } catch(e) { alert(e?.detail || "Failed to log"); setSaving(false); }
@@ -184,6 +191,7 @@ function AddModal({ logDate, recipes, onSave, onClose }) {
                         padding: "10px", marginBottom: 14, textAlign: "center" }}>
             <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
               {cal} kcal · P:{prot}g · C:{carb}g · F:{fat}g
+              {fiber != null ? ` · Fib:${fiber}g` : ""}
             </span>
           </div>
         )}
@@ -235,10 +243,12 @@ export default function Diary({ user }) {
     loadLogs();
   }
 
-  const totalCal  = logs.reduce((s, r) => s + (r.calories  || 0), 0);
-  const totalProt = logs.reduce((s, r) => s + (r.protein_g || 0), 0);
-  const totalCarb = logs.reduce((s, r) => s + (r.carb_g    || 0), 0);
-  const totalFat  = logs.reduce((s, r) => s + (r.fat_g     || 0), 0);
+  const totalCal   = logs.reduce((s, r) => s + (r.calories  || 0), 0);
+  const totalProt  = logs.reduce((s, r) => s + (r.protein_g || 0), 0);
+  const totalCarb  = logs.reduce((s, r) => s + (r.carb_g    || 0), 0);
+  const totalFat   = logs.reduce((s, r) => s + (r.fat_g     || 0), 0);
+  const totalFiber = logs.reduce((s, r) => s + (r.fiber_g   || 0), 0);
+  const hasFiberData = logs.some(r => r.fiber_g != null);
 
   return (
     <div className="page">
@@ -262,7 +272,9 @@ export default function Diary({ user }) {
           {[["Cal", Math.round(totalCal), "kcal"],
             ["Protein", Math.round(totalProt), "g"],
             ["Carbs", Math.round(totalCarb), "g"],
-            ["Fat", Math.round(totalFat), "g"]].map(([l, v, u]) => (
+            ["Fat", Math.round(totalFat), "g"],
+            ...(hasFiberData ? [["Fiber", Math.round(totalFiber * 10) / 10, "g"]] : []),
+          ].map(([l, v, u]) => (
             <div className="stat-card" key={l}>
               <div className="stat-label">{l}</div>
               <div className="stat-val">{v}</div>
@@ -289,6 +301,7 @@ export default function Diary({ user }) {
                   <span className={`meal-pill ${lg.meal_type}`}>{lg.meal_type}</span>
                   {lg.calories} kcal · P:{Math.round(lg.protein_g)}g ·
                   C:{Math.round(lg.carb_g)}g · F:{Math.round(lg.fat_g)}g
+                  {lg.fiber_g != null ? ` · Fib:${Math.round(lg.fiber_g * 10) / 10}g` : ""}
                 </div>
               </div>
               <div className="log-actions">

@@ -14,7 +14,8 @@ from db.nutrition_targets import get_default_target
 
 def _r(name, meal_type, food_type, food_group, calories, protein, carb, fat,
        role="side", cuisine="north_indian",
-       portion_min=0.5, portion_typical=1.0, portion_max=2.5):
+       portion_min=0.5, portion_typical=1.0, portion_max=2.5,
+       fiber=3.0):
     return {
         "name":             name,
         "category":         "recipe",
@@ -25,6 +26,7 @@ def _r(name, meal_type, food_type, food_group, calories, protein, carb, fat,
         "protein":          float(protein),
         "carbohydrate":     float(carb),
         "fat":              float(fat),
+        "fiber":            float(fiber) if fiber is not None else None,
         "role":             role,
         "cuisine":          cuisine,
         "portion_min":      portion_min,
@@ -53,6 +55,8 @@ FIXTURE_RECIPES = [
     # Dairy / egg
     _r("Paneer Makhani",   "Lunch|Dinner", "dairy",   "dairy_protein",  340, 16, 18, 22, "anchor_protein"),
     _r("Egg Curry",        "Lunch|Dinner", "egg",     "egg_protein",    300, 14, 12, 18, "anchor_protein"),
+    _r("Tandoori Chicken", "Lunch|Dinner", "non-veg", "grilled_poultry", 250, 30,  8, 10, "anchor_protein"),
+    _r("Soy Chunks Curry", "Lunch|Dinner", "vegan",   "soy",            220, 28, 12,  8, "anchor_protein"),
 
     # ── Lunch / Dinner — anchor starches (all vegan) ──────────────────────────
     # Same food_group ("rice") intentionally prevents Steamed Rice + Jeera Rice
@@ -85,6 +89,8 @@ FIXTURE_RECIPES = [
     _r("Egg Omelette",     "Breakfast",    "egg",     "egg_dish",       220, 14,  4, 16, "complete_meal", "continental"),
     _r("PB Toast",         "Breakfast",    "vegan",   "bread",          320, 12, 38, 14, "complete_meal", "continental"),
     _r("Paratha",          "Breakfast",    "dairy",   "wheat_bread",    380,  9, 58, 14, "complete_meal"),
+    _r("Moong Dal Chilla", "Breakfast",    "vegan",   "lentil_crepe",   200, 14, 24,  6, "complete_meal"),
+    _r("Egg Bhurji",       "Breakfast",    "egg",     "scrambled_egg",  180, 16,  4, 12, "complete_meal"),
     _r("Banana Smoothie",  "Breakfast",    "vegan",   "fruit_drink",    200,  4, 42,  2, "side", "unknown"),
 
     # ── Snacks ────────────────────────────────────────────────────────────────
@@ -100,6 +106,7 @@ FIXTURE_RECIPES = [
     # ── Gap fillers (role="gap_filler") ───────────────────────────────────────
     # Phase 3 adds these only when a macro deficit ≥ 5 g persists after Phase 2.
     _r("Protein Shake",    "Snack",        "dairy",   "supplement",     150, 25,  8,  2, "gap_filler", "unknown"),
+    _r("Boiled Chicken",   "Snack",        "non-veg", "lean_poultry",   165, 31,  0,  4, "gap_filler", "unknown"),
     _r("Chia Seeds",       "Snack",        "vegan",   "seeds",          100,  5, 12,  5, "gap_filler", "unknown"),
 ]
 
@@ -136,6 +143,22 @@ def no_gap_filler_df():
 def no_role_column_df():
     """DataFrame without a 'role' column — optimizer should fill in 'side' default."""
     df = pd.DataFrame(FIXTURE_RECIPES).drop(columns=["role"])
+    return df
+
+
+@pytest.fixture(scope="module")
+def no_fiber_df():
+    """All fiber values set to NULL — coverage gate should keep fiber_active=False."""
+    df = pd.DataFrame(FIXTURE_RECIPES).copy()
+    df["fiber"] = None
+    return df
+
+
+@pytest.fixture(scope="module")
+def sparse_fiber_df():
+    """Only 50% of recipes have fiber — coverage gate should keep fiber_active=False."""
+    df = pd.DataFrame(FIXTURE_RECIPES).copy()
+    df.loc[df.index[len(df) // 2:], "fiber"] = None
     return df
 
 

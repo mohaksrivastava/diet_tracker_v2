@@ -4,3 +4,5 @@ __pycache__/
 *.pyo
 .env
 nutra-ai_frontend/
+# one-time admin scripts — keep off GitHub
+schedulers/backfill_fiber.py

@@ -27,7 +27,8 @@ def get_default_target(daily_cal: int) -> dict:
         "fiber_soft_lo":   0.10,
         # Hard limits (candidates rejected outside)
         "cal_hard_pct":    0.20,
-        "protein_hard_lo": 0.20,
+        "protein_hard_lo": 0.10,
+        "protein_hard_hi": 0.10,
         "fat_hard_hi":     0.25,
         "fat_hard_lo":     0.30,
         "carb_hard_pct":   0.35,
@@ -44,6 +45,41 @@ def get_default_target(daily_cal: int) -> dict:
 def get_macro_split() -> dict:
     """Return the canonical macro split percentages for display and recomputation."""
     return {"protein_pct": 0.30, "carb_pct": 0.50, "fat_pct": 0.20}
+
+
+# ── History blending ──────────────────────────────────────────────────────────
+
+def blend_macro_targets(nt: dict, history_df, n_history: int) -> dict:
+    """
+    Adjust fat and carb targets based on historical intake (up to 7 days).
+
+    Uses cumulative gap formula:
+        blended = daily_target * (N+1) - sum(eaten over N days)
+
+    Clamped to 50%-150% of daily target to prevent extreme values.
+    Protein is NEVER blended — it stays strict per-day.
+
+    Returns a modified copy of nt with adjusted fat_g and carb_g.
+    """
+    if n_history == 0 or history_df is None or history_df.empty:
+        return dict(nt)
+
+    out = dict(nt)
+    daily_fat  = float(nt["fat_g"])
+    daily_carb = float(nt["carb_g"])
+
+    hist_fat  = float(history_df["total_fat"].sum())
+    hist_carb = float(history_df["total_carb"].sum())
+
+    # Cumulative gap: what today needs to bring the (N+1)-day total on target
+    blended_fat  = daily_fat  * (n_history + 1) - hist_fat
+    blended_carb = daily_carb * (n_history + 1) - hist_carb
+
+    # Clamp to 50%-150% of daily target
+    out["fat_g"]  = round(max(daily_fat  * 0.50, min(blended_fat,  daily_fat  * 1.50)), 1)
+    out["carb_g"] = round(max(daily_carb * 0.50, min(blended_carb, daily_carb * 1.50)), 1)
+
+    return out
 
 
 # ── DB helpers ────────────────────────────────────────────────────────────────
@@ -65,7 +101,17 @@ def load_or_default_target(conn, user_id: int, daily_cal: int) -> dict:
     gets a valid target dict even before the migration has run.
     """
     target = load_nutrition_target(conn, user_id)
-    return target if target else get_default_target(daily_cal)
+    if target is None:
+        return get_default_target(daily_cal)
+    # Backfill protein_hard_hi for legacy rows that lack it
+    if "protein_hard_hi" not in target or target.get("protein_hard_hi") is None:
+        target["protein_hard_hi"] = 0.10
+    # Backfill fiber keys for legacy rows that pre-date the fiber migration
+    target.setdefault("fiber_g",       30.0)
+    target.setdefault("fiber_soft_lo",  0.10)
+    target.setdefault("fiber_hard_lo",  0.30)
+    target.setdefault("k_fiber_under", 800.0)
+    return target
 
 
 def recompute_grams_from_cal(nt: dict, new_cal: int) -> dict:
@@ -108,12 +154,12 @@ def save_nutrition_target(conn, user_id: int, data: dict):
         """INSERT INTO nutrition_targets
              (user_id, cal_target, protein_g, fat_g, carb_g, fiber_g,
               cal_soft_pct, protein_soft_lo, fat_soft_hi, carb_soft_pct,
-              fiber_soft_lo, cal_hard_pct, protein_hard_lo, fat_hard_hi,
-              fat_hard_lo, carb_hard_pct, fiber_hard_lo,
+              fiber_soft_lo, cal_hard_pct, protein_hard_lo, protein_hard_hi,
+              fat_hard_hi, fat_hard_lo, carb_hard_pct, fiber_hard_lo,
               k_cal, k_protein_under, k_fat_over, k_carb, k_fiber_under,
               updated_at)
            VALUES
-             (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+             (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
               %s,%s,%s,%s,%s, NOW())
            ON CONFLICT (user_id) DO UPDATE SET
              cal_target       = EXCLUDED.cal_target,
@@ -128,6 +174,7 @@ def save_nutrition_target(conn, user_id: int, data: dict):
              fiber_soft_lo    = EXCLUDED.fiber_soft_lo,
              cal_hard_pct     = EXCLUDED.cal_hard_pct,
              protein_hard_lo  = EXCLUDED.protein_hard_lo,
+             protein_hard_hi  = EXCLUDED.protein_hard_hi,
              fat_hard_hi      = EXCLUDED.fat_hard_hi,
              fat_hard_lo      = EXCLUDED.fat_hard_lo,
              carb_hard_pct    = EXCLUDED.carb_hard_pct,
@@ -143,7 +190,9 @@ def save_nutrition_target(conn, user_id: int, data: dict):
          data["carb_g"],     data["fiber_g"],
          data["cal_soft_pct"],    data["protein_soft_lo"], data["fat_soft_hi"],
          data["carb_soft_pct"],   data["fiber_soft_lo"],
-         data["cal_hard_pct"],    data["protein_hard_lo"], data["fat_hard_hi"],
+         data["cal_hard_pct"],    data["protein_hard_lo"],
+         data.get("protein_hard_hi", 0.10),
+         data["fat_hard_hi"],
          data["fat_hard_lo"],     data["carb_hard_pct"],   data["fiber_hard_lo"],
          data["k_cal"],           data["k_protein_under"], data["k_fat_over"],
          data["k_carb"],          data["k_fiber_under"]))

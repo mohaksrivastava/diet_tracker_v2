@@ -906,15 +906,16 @@ def _seed_recipes(conn):
             execute(conn,
                 """INSERT INTO recipes
                      (name,category,meal_type,food_type,food_group,difficulty,
-                      cook_time_mins,calories,protein,carbohydrate,fat,
+                      cook_time_mins,calories,protein,carbohydrate,fat,fiber,
                       portion_min,portion_typical,portion_max,role,cuisine,
                       serving_note,ingredients,steps)
-                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (r["name"], r.get("category","recipe"), r["meal_type"],
                  r["food_type"], r["food_group"], r["difficulty"],
                  int(r["cook_time_mins"]),
                  float(r["calories"]), float(r["protein"]),
                  float(r["carbohydrate"]), float(r["fat"]),
+                 float(r["fiber"]) if r.get("fiber") is not None else None,
                  float(r.get("portion_min",0.5)),
                  float(r.get("portion_typical",1.0)),
                  float(r.get("portion_max",1.5)),

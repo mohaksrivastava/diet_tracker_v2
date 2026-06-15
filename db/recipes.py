@@ -5,12 +5,12 @@ from db.connection import execute
 def get_all_recipes(conn) -> pd.DataFrame:
     base = execute(conn,
         """SELECT id, name, category, meal_type, food_type, food_group,
-                  difficulty, cook_time_mins, calories, protein, carbohydrate, fat,
+                  difficulty, cook_time_mins, calories, protein, carbohydrate, fat, fiber,
                   portion_min, portion_typical, portion_max, role, cuisine
            FROM recipes ORDER BY name""", fetch="all")
     custom = execute(conn,
         """SELECT id, name, category, meal_type, food_type, food_group,
-                  difficulty, cook_time_mins, calories, protein, carbohydrate, fat,
+                  difficulty, cook_time_mins, calories, protein, carbohydrate, fat, fiber,
                   COALESCE(portion_min,0.5) AS portion_min,
                   COALESCE(portion_typical,1.0) AS portion_typical,
                   COALESCE(portion_max,1.5) AS portion_max,
@@ -22,7 +22,7 @@ def get_all_recipes(conn) -> pd.DataFrame:
     if not rows:
         return pd.DataFrame()
     df = pd.DataFrame([dict(r) for r in rows])
-    for col in ["calories","protein","carbohydrate","fat",
+    for col in ["calories","protein","carbohydrate","fat","fiber",
                 "portion_min","portion_typical","portion_max"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -58,12 +58,13 @@ def fill_custom_recipe(conn, recipe_id: int, data: dict):
     execute(conn,
         """UPDATE custom_recipes SET status='filled',meal_type=%s,food_type=%s,
              food_group=%s,difficulty=%s,cook_time_mins=%s,calories=%s,protein=%s,
-             carbohydrate=%s,fat=%s,portion_min=%s,portion_typical=%s,portion_max=%s,
+             carbohydrate=%s,fat=%s,fiber=%s,portion_min=%s,portion_typical=%s,portion_max=%s,
              role=%s,cuisine=%s,serving_note=%s,ingredients=%s,steps=%s,filled_at=NOW()
            WHERE id=%s""",
         (data.get("meal_type"), data.get("food_type"), data.get("food_group"),
          data.get("difficulty"), data.get("cook_time_mins"),
          data.get("calories"), data.get("protein"), data.get("carbohydrate"), data.get("fat"),
+         data.get("fiber"),
          data.get("portion_min",0.5), data.get("portion_typical",1.0), data.get("portion_max",1.5),
          data.get("role","side"), data.get("cuisine","unknown"),
          data.get("serving_note"), data.get("ingredients"), data.get("steps"),

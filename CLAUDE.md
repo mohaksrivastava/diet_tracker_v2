@@ -109,3 +109,36 @@ difficulty : Easy | Medium | Hard
 | `SUPABASE_PASS` | Database password |
 
 Loaded from `.env` locally via `python-dotenv`; set as Secrets in HF Space for production.
+
+
+## gstack Rules
+- Use the `/browse` skill from gstack for all web browsing.
+- NEVER use default `mcp__claude-in-chrome__*` tools.
+- If gstack skills ever stop working, run: `cd .claude/skills/gstack && ./setup` to rebuild the binary and register the skills.
+
+## Available gstack Slash Commands
+- `/office-hours` : YC-style product strategy consultation (fuzzy requirements framing).
+- `/plan-ceo-review` : Validates product scope and filters out feature creep.
+- `/plan-eng-review` : Locks in architecture decisions and technical design.
+- `/plan-design-review` : Catches AI UI/UX "slop" and reviews design logic.
+- `/review` : Scans for production bugs, edge cases, and technical debt.
+- `/qa` : Spins up a real browser to perform automated end-to-end testing.
+- `/ship` : Final release validation, commits, and handles PR deployment.
+
+## Skill routing
+
+When the user's request matches an available skill, invoke it via the Skill tool. When in doubt, invoke the skill.
+
+Key routing rules:
+- Product ideas/brainstorming → invoke /office-hours
+- Strategy/scope → invoke /plan-ceo-review
+- Architecture → invoke /plan-eng-review
+- Design system/plan review → invoke /design-consultation or /plan-design-review
+- Full review pipeline → invoke /autoplan
+- Bugs/errors → invoke /investigate
+- QA/testing site behavior → invoke /qa or /qa-only
+- Code review/diff check → invoke /review
+- Visual polish → invoke /design-review
+- Ship/deploy/PR → invoke /ship or /land-and-deploy
+- Save progress → invoke /context-save
+- Resume context → invoke /context-restore

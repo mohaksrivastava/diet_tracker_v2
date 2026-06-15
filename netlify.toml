@@ -1,0 +1,17 @@
+[build]
+  base    = "frontend"
+  publish = "dist"
+  command = "npm run build"
+
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Production deploy (master branch) uses the live API
+[context.production.environment]
+  VITE_API_URL = "https://mohaksrivastava2912-diet-tracker-api.hf.space"
+
+# Testing branch deploy uses the test API space
+[context.testing.environment]
+  VITE_API_URL = "https://mohaksrivastava2912-diet-tracker-api-test.hf.space"

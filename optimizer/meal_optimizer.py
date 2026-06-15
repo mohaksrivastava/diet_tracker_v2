@@ -127,6 +127,14 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
         if col not in df.columns: df[col] = default
         else:                      df[col] = df[col].fillna(default)
 
+    # Fiber penalty is active only when ≥80% of recipes have a fiber value
+    fiber_active = bool(
+        "fiber" in df.columns and
+        pd.to_numeric(df["fiber"], errors="coerce").notna().mean() >= 0.80
+    )
+    if fiber_active:
+        df["fiber"] = pd.to_numeric(df["fiber"], errors="coerce").fillna(0.0)
+
     daily_cal    = float(nutrition_target["cal_target"])
     slot_seq     = SLOT_SEQ[K]
     slot_targets = {s: get_slot_target(K,s,daily_cal)
@@ -135,7 +143,7 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
     # Phase 1
     slot_cands = []
     for s_type in slot_seq:
-        cands = _gen_slot_cands(df, s_type, slot_targets[s_type], nutrition_target)
+        cands = _gen_slot_cands(df, s_type, slot_targets[s_type], nutrition_target, fiber_active)
         if not cands:
             raise ValueError(
                 f"No valid meals for '{s_type}'. Check recipe tags "
@@ -161,6 +169,7 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
     ab = sum(_arr(si,"anchor_bonus")[flat[si]]for si in range(K))
 
     pg = pc/4.0; cg = cc/4.0; fg = fc/9.0
+    fibg = sum(_arr(si,"fiber_g")[flat[si]] for si in range(K)) if fiber_active else None
 
     relax_level = "strict"; feas = np.zeros(N, dtype=bool)
     for name, mult in RELAXATION_LEVELS:
@@ -172,7 +181,8 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
         if feas.sum()>0: relax_level=name; break
 
     f_tc=tc[feas]; f_pg=pg[feas]; f_fg=fg[feas]; f_cg=cg[feas]
-    scores = (_macro_pen(f_tc,f_pg,f_fg,f_cg,nutrition_target)
+    f_fibg = fibg[feas] if fiber_active else None
+    scores = (_macro_pen(f_tc,f_pg,f_fg,f_cg,nutrition_target,f_fibg)
               + ep[feas] + pp[feas] + cp[feas] + ab[feas])
 
     feas_pos = np.where(feas)[0]
@@ -198,11 +208,11 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
             chosen=[slot_cands[si][combo[si]] for si in range(K)]
             selected.append((float(scores[li]),combo,chosen))
 
-    plans = _format(selected, slot_seq, df, nutrition_target)
+    plans = _format(selected, slot_seq, df, nutrition_target, fiber_active)
 
     # Phase 3
     if not fillers_df.empty:
-        plans = [_gap_fill(plan, fillers_df, nutrition_target, food_pref)
+        plans = [_gap_fill(plan, fillers_df, nutrition_target, food_pref, fiber_active)
                  for plan in plans]
 
     return {
@@ -211,20 +221,24 @@ def run_optimizer(recipes_df: pd.DataFrame, K: int,
         "runtime_ms": round((time.monotonic()-t0)*1000),
         "num_candidates": N,
         "num_feasible": int(feas.sum()),
+        "fiber_active": fiber_active,
     }
 
 
 # ── Phase 3 ────────────────────────────────────────────────────────────────────
-def _gap_fill(plan, fillers_df, nt, food_pref):
+def _gap_fill(plan, fillers_df, nt, food_pref, fiber_active=False):
     gap_cal  = nt["cal_target"] - plan["total_cal"]
     gap_prot = nt["protein_g"]  - plan["protein_g"]
     gap_carb = nt["carb_g"]     - plan["carb_g"]
     gap_fat  = nt["fat_g"]      - plan["fat_g"]
 
-    deficits = {"protein":gap_prot, "carb":gap_carb, "fat":gap_fat}
-    dominant = max(deficits, key=lambda k: deficits[k])
-    if deficits[dominant] < GAP_FILLER_MIN_GAP_G: return plan
-    if gap_cal < -GAP_FILLER_MAX_OVERSHOOT:        return plan
+    if gap_cal < -GAP_FILLER_MAX_OVERSHOOT: return plan
+    if gap_prot > GAP_FILLER_MIN_GAP_G:
+        dominant = "protein"
+    else:
+        deficits = {"carb": gap_carb, "fat": gap_fat}
+        if max(deficits.values()) < GAP_FILLER_MIN_GAP_G: return plan
+        dominant = max(deficits, key=lambda k: deficits[k])
 
     allowed = set(ALLOWED_TYPES.get(food_pref, ALLOWED_TYPES["non-veg"]))
     pool    = fillers_df[fillers_df["food_type"].isin(allowed)]
@@ -245,6 +259,11 @@ def _gap_fill(plan, fillers_df, nt, food_pref):
             mv = {"protein":fp, "carb":fc2, "fat":ff}
             if mv[dominant] <= 0: continue
             score = mv[dominant]/max(fc,1)
+            # Protein-density bonus: prefer high-protein fillers when closing protein gap
+            if dominant == "protein":
+                prot_per_100kcal = float(r["protein"]) * 100 / max(float(r["calories"]), 1)
+                if prot_per_100kcal > 6.0:
+                    score *= 2.0
             if score > best_score:
                 best_score = score
                 best = (r, port, round(fc), round(fp,1), round(fc2,1), round(ff,1))
@@ -252,10 +271,12 @@ def _gap_fill(plan, fillers_df, nt, food_pref):
     if best is None: return plan
     r_row, port, fc, fp, fc2, ff = best
 
+    fib_filler = round(float(r_row.get("fiber") or 0)*port, 1) if fiber_active else None
     filler_r = {
         "name":r_row["name"], "portion":port,
         "calories_shown":fc, "protein_shown":fp,
         "carb_shown":fc2, "fat_shown":ff,
+        "fiber_shown":fib_filler,
         "calories":float(r_row["calories"]),
         "protein":float(r_row["protein"]),
         "carbohydrate":float(r_row["carbohydrate"]),
@@ -278,9 +299,12 @@ def _gap_fill(plan, fillers_df, nt, food_pref):
     nc=round(plan["total_cal"]+fc); np2=round(plan["protein_g"]+fp,1)
     nc2=round(plan["carb_g"]+fc2,1); nf=round(plan["fat_g"]+ff,1)
     mc=max(np2*4+nc2*4+nf*9,1)
+    nfib=(round((plan.get("fiber_g") or 0.0)+fib_filler,1)
+          if fiber_active else plan.get("fiber_g"))
 
     return {**plan, "slots":updated, "total_cal":nc,
             "protein_g":np2, "carb_g":nc2, "fat_g":nf,
+            "fiber_g":nfib,
             "prot_pct":round(np2*4/mc*100),
             "carb_pct":round(nc2*4/mc*100),
             "fat_pct": round(nf*9/mc*100),
@@ -327,6 +351,7 @@ def _hard_feasible(cal,pg,fg,cg,t):
     return ((cal>=t["cal_target"]*(1-t["cal_hard_pct"])) &
             (cal<=t["cal_target"]*(1+t["cal_hard_pct"])) &
             (pg>=t["protein_g"]*(1-t["protein_hard_lo"])) &
+            (pg<=t["protein_g"]*(1+t.get("protein_hard_hi",0.10))) &
             (fg>=t["fat_g"]*(1-t["fat_hard_lo"])) &
             (fg<=t["fat_g"]*(1+t["fat_hard_hi"])) &
             (cg>=t["carb_g"]*(1-t["carb_hard_pct"])) &
@@ -334,28 +359,32 @@ def _hard_feasible(cal,pg,fg,cg,t):
 
 def _scale_hard(t, mult):
     out=dict(t)
-    for k in ["cal_hard_pct","protein_hard_lo","fat_hard_hi",
-              "fat_hard_lo","carb_hard_pct","fiber_hard_lo"]:
+    for k in ["cal_hard_pct","protein_hard_lo","protein_hard_hi",
+              "fat_hard_hi","fat_hard_lo","carb_hard_pct","fiber_hard_lo"]:
         out[k]=t.get(k,0.25)*mult
     return out
 
-def _macro_pen(cal,pg,fg,cg,t):
-    pen=np.zeros(len(cal)); kp=t.get("k_protein_under",2000)
+def _macro_pen(cal,pg,fg,cg,t,fibg=None):
+    pen=np.zeros(len(cal)); kp=t.get("k_protein_under",2500)
     cal_dev=np.maximum(0,np.abs(cal-t["cal_target"])/t["cal_target"]-t.get("cal_soft_pct",0.08))
     pen+=t.get("k_cal",1000)*cal_dev**2
     pu=np.maximum(0,(t["protein_g"]*(1-t.get("protein_soft_lo",0.05))-pg)/t["protein_g"])
-    po=np.maximum(0,(pg-t["protein_g"]*1.20)/t["protein_g"])
+    po=np.maximum(0,(pg-t["protein_g"]*1.25)/t["protein_g"])
     pen+=kp*pu**2+(kp/4)*po**2
     fo=np.maximum(0,(fg-t["fat_g"]*(1+t.get("fat_soft_hi",0.10)))/t["fat_g"])
     fu=np.maximum(0,(t["fat_g"]*0.60-fg)/t["fat_g"])
     pen+=t.get("k_fat_over",1500)*fo**2+200*fu**2
     cd=np.maximum(0,np.abs(cg-t["carb_g"])/t["carb_g"]-t.get("carb_soft_pct",0.15))
     pen+=t.get("k_carb",400)*cd**2
+    if fibg is not None:
+        fiber_lo=t.get("fiber_g",30.0)*(1-t.get("fiber_soft_lo",0.10))
+        fib_u=np.maximum(0,(fiber_lo-fibg)/max(t.get("fiber_g",30.0),1))
+        pen+=t.get("k_fiber_under",800)*fib_u**2
     return pen
 
 
 # ── Phase 1 ────────────────────────────────────────────────────────────────────
-def _gen_slot_cands(df, s_type, s_target, nt):
+def _gen_slot_cands(df, s_type, s_target, nt, fiber_active=False):
     sp=SLOT_PARAMS[s_type]; min_n=sp["min_n"]; max_n=sp["max_n"]
     has_fg="food_group" in df.columns
     elig=df[df["meal_type"].str.contains(sp["kw"],case=False,na=False)].copy()
@@ -382,6 +411,7 @@ def _gen_slot_cands(df, s_type, s_target, nt):
             "prot_cal":   float(r["protein"]      *bp*4),
             "carb_cal":   float(r["carbohydrate"] *bp*4),
             "fat_cal":    float(r["fat"]           *bp*9),
+            "fiber_g":    float((r.get("fiber") or 0)*bp) if fiber_active else 0.0,
             "food_groups":[str(r.get("food_group","misc"))],
             "extra_pen":  0.0,
             "portion_pen":float(_portion_pen([bp],[p_typ])),
@@ -428,6 +458,7 @@ def _gen_slot_cands(df, s_type, s_target, nt):
                 "prot_cal":  float(np.sum(rr["protein"].values     *bp)*4),
                 "carb_cal":  float(np.sum(rr["carbohydrate"].values*bp)*4),
                 "fat_cal":   float(np.sum(rr["fat"].values          *bp)*9),
+                "fiber_g":   float(np.sum(rr["fiber"].fillna(0).values*bp)) if fiber_active else 0.0,
                 "food_groups":fgs, "extra_pen":float(ep),
                 "portion_pen":float(pp), "cuisine_pen":float(cp),
                 "anchor_bonus":float(ab),
@@ -439,10 +470,10 @@ def _gen_slot_cands(df, s_type, s_target, nt):
 
 
 # ── Output ─────────────────────────────────────────────────────────────────────
-def _format(selected, slot_seq, df, nt):
+def _format(selected, slot_seq, df, nt, fiber_active=False):
     plans=[]
     for score,combo,chosen in selected:
-        slots=[]; tp=tc=tf=0.0
+        slots=[]; tp=tc=tf=tfib=0.0
         for si,cand in enumerate(chosen):
             rs=[]
             for idx,port in zip(cand["indices"],cand["portions"]):
@@ -452,7 +483,9 @@ def _format(selected, slot_seq, df, nt):
                 r["protein_shown"] =round(r["protein"]     *port,1)
                 r["carb_shown"]    =round(r["carbohydrate"]*port,1)
                 r["fat_shown"]     =round(r["fat"]          *port,1)
+                r["fiber_shown"]   =round(float(r.get("fiber") or 0)*port,1) if fiber_active else None
                 rs.append(r); tp+=r["protein_shown"]; tc+=r["carb_shown"]; tf+=r["fat_shown"]
+                if fiber_active: tfib+=r["fiber_shown"]
             slots.append({"type":slot_seq[si],"recipes":rs,
                           "total_cal":sum(r["calories_shown"]for r in rs),
                           "n_recipes":len(rs)})
@@ -460,6 +493,7 @@ def _format(selected, slot_seq, df, nt):
         plans.append({
             "slots":slots,"total_cal":total_c,
             "protein_g":round(tp,1),"carb_g":round(tc,1),"fat_g":round(tf,1),
+            "fiber_g":round(tfib,1) if fiber_active else None,
             "score":round(score,1),
             "prot_pct":round(tp*4/mc*100),"carb_pct":round(tc*4/mc*100),"fat_pct":round(tf*9/mc*100),
             "macro_deviations":{

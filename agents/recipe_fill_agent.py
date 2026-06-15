@@ -66,6 +66,7 @@ Return ONLY a valid JSON object in this exact structure — no explanation, no m
   "protein": 14.0,
   "carbohydrate": 36.0,
   "fat": 8.0,
+  "fiber": 7.5,
   "ingredients": "Ingredient 1 quantity|Ingredient 2 quantity|...",
   "steps": "Step 1 description|Step 2 description|..."
 }}
@@ -109,6 +110,12 @@ def _validate_and_clean(data: dict) -> dict | None:
         except (TypeError, ValueError):
             log.warning(f"Invalid numeric value for {field}: {data[field]}")
             return None
+
+    # Fiber: optional, clamp [0, 40]
+    try:
+        data["fiber"] = max(0.0, min(float(data.get("fiber") or 0), 40.0))
+    except (TypeError, ValueError):
+        data["fiber"] = None
 
     # Sanity bounds for Indian food (very loose)
     if not (20 <= data["calories"] <= 1200):
